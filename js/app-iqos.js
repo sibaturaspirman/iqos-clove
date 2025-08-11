@@ -58,9 +58,13 @@ function goToGameplay(){
     $("#sectionGameplay").removeClass("hide")
     $(".circle").removeClass("off")
 }
+// DEBUG
+// goToGameplay()
 
 function gameEnd(win){
     perfectSound.play()
+    finished = false
+    reset()
     pageStatus = 'endGame'
     $(".circle").addClass("off")
     if(win == 1){
@@ -98,8 +102,6 @@ function onKey1() {
         pageStart(1)
     }else if(pageStatus == 'playerReady'){
         goToCountdown()
-    }else if(pageStatus == 'gameplay'){
-        gameEnd(1)
     }
 }
 
@@ -108,48 +110,178 @@ function onKey2() {
         pageStart(2)
     }else if(pageStatus == 'playerReady'){
         goToCountdown()
-    }else if(pageStatus == 'gameplay'){
-        gameEnd(2)
     }
 }
 
   // Helper: abaikan jika user sedang mengetik di field form
-  function isTypingInField(el) {
-    if (!el) return false;
-    const tag = el.tagName ? el.tagName.toLowerCase() : '';
-    const editable = $(el).attr('contenteditable') === 'true';
-    return tag === 'input' || tag === 'textarea' || editable;
-  }
+//   function isTypingInField(el) {
+//     if (!el) return false;
+//     const tag = el.tagName ? el.tagName.toLowerCase() : '';
+//     const editable = $(el).attr('contenteditable') === 'true';
+//     return tag === 'input' || tag === 'textarea' || editable;
+//   }
 
-  // Tangkap keydown sekali (hindari repeat)
-  let pressed = new Set();
+//   // Tangkap keydown sekali (hindari repeat)
+//   let pressed = new Set();
 
-  $(document).on('keydown', function (e) {
-    if (isTypingInField(document.activeElement)) return;
+//   $(document).on('keydown', function (e) {
+//     if (isTypingInField(document.activeElement)) return;
 
-    // e.key akan '1' / '2'
-    // e.code bisa 'Digit1' / 'Numpad1'
-    const is1 = e.key === '1' || e.code === 'Digit1' || e.code === 'Numpad1';
-    const is2 = e.key === '2' || e.code === 'Digit2' || e.code === 'Numpad2';
+//     // e.key akan '1' / '2'
+//     // e.code bisa 'Digit1' / 'Numpad1'
+//     const is1 = e.key === '1' || e.code === 'Digit1' || e.code === 'Numpad1';
+//     const is2 = e.key === '2' || e.code === 'Digit2' || e.code === 'Numpad2';
 
-    if (is1 && !pressed.has('1')) {
-      pressed.add('1');
-      e.preventDefault();
-      onKey1();
+//     if (is1 && !pressed.has('1')) {
+//       pressed.add('1');
+//       e.preventDefault();
+//       onKey1();
+//     }
+//     if (is2 && !pressed.has('2')) {
+//       pressed.add('2');
+//       e.preventDefault();
+//       onKey2();
+//     }
+//   });
+
+//   // Lepaskan status saat keyup supaya bisa dipicu lagi
+//   $(document).on('keyup', function (e) {
+//     if (['1', 'Digit1', 'Numpad1'].includes(e.key) || e.code === 'Digit1' || e.code === 'Numpad1') {
+//       pressed.delete('1');
+//     }
+//     if (['2', 'Digit2', 'Numpad2'].includes(e.key) || e.code === 'Digit2' || e.code === 'Numpad2') {
+//       pressed.delete('2');
+//     }
+//   });
+
+
+// =====================================================
+    // Geometry
+    const cx = 300, cy = 300, r = 153;
+    const rOuter = 240;
+    const step = 6; // derajat per tekan
+    // Start di bawah (180°)
+    let greenAngle  = 180; // bergerak ke 0 (CCW)
+    let purpleAngle = 180; // bergerak ke 360 (CW)
+    let finished = false;
+  
+    const $gArc = $("#greenArc");
+    const $pArc = $("#purpleArc");
+    const $gOrb = $("#greenOrb");
+    const $pOrb = $("#purpleOrb");
+  
+    function toRad(d){ return d * Math.PI/180; }
+    function polar(angleDeg, radius = r) {
+        const a = toRad(angleDeg);
+        return { x: cx + radius * Math.cos(a), y: cy + radius * Math.sin(a) };
     }
-    if (is2 && !pressed.has('2')) {
-      pressed.add('2');
-      e.preventDefault();
-      onKey2();
+  
+    // SVG arc path dari angle A ke B, arah CW/CCW
+    function arcPath(fromDeg, toDeg, sweepCW){
+      // clamp
+      if (sweepCW) { if (toDeg < fromDeg) toDeg = fromDeg; }
+      else { if (toDeg > fromDeg) toDeg = fromDeg; }
+  
+      const start = polar(fromDeg);
+      const end   = polar(toDeg);
+      const delta = Math.abs(toDeg - fromDeg);
+      const large = (delta > 180) ? 1 : 0;
+      const sweep = sweepCW ? 1 : 0;
+      return `M ${start.x.toFixed(2)} ${start.y.toFixed(2)} A ${r} ${r} 0 ${large} ${sweep} ${end.x.toFixed(2)} ${end.y.toFixed(2)}`;
     }
-  });
+  
+    function placeOrb($el, angle, radius = r) {
+        const p = polar(angle, radius);
+        $el.attr({ cx: p.x, cy: p.y });
+    }
+    function placeOrbImage($el, angle, radius, size) {
+        const p = polar(angle, radius);
+        $el.attr({
+          x: p.x - size/2,
+          y: p.y - size/2
+        });
+    }
+  
+    function draw(){
+      // green: dari 180 -> greenAngle (CCW)
+      $gArc.attr('d', arcPath(180, greenAngle, /*CW?*/ false));
+      // purple: dari 180 -> purpleAngle (CW)
+      $pArc.attr('d', arcPath(180, purpleAngle, /*CW?*/ true));
+  
+    //   placeOrb($pOrb, greenAngle, rOuter);
+    //   placeOrb($gOrb, purpleAngle, rOuter);
+      
+      placeOrbImage($pOrb, greenAngle, rOuter, 80);
+      placeOrbImage($gOrb, purpleAngle, rOuter, 80);
 
-  // Lepaskan status saat keyup supaya bisa dipicu lagi
-  $(document).on('keyup', function (e) {
-    if (['1', 'Digit1', 'Numpad1'].includes(e.key) || e.code === 'Digit1' || e.code === 'Numpad1') {
-      pressed.delete('1');
     }
-    if (['2', 'Digit2', 'Numpad2'].includes(e.key) || e.code === 'Digit2' || e.code === 'Numpad2') {
-      pressed.delete('2');
+  
+    function checkWin(){
+        if (finished) return;
+        if (greenAngle <= 0 && purpleAngle >= 360){
+          finished = true;
+          setStatus('🤝 Draw! Kalian bertemu di puncak');
+        } else if (greenAngle <= 0){
+          finished = true;
+          console.log("PURPLE MENANG")
+          gameEnd(2)
+        } else if (purpleAngle >= 360){
+          finished = true;
+          console.log("GREEN MENANG")
+          gameEnd(1)
+        }
     }
-  });
+  
+    function reset(){
+      greenAngle = 180;
+      purpleAngle = 180;
+      finished = false;
+      draw();
+    }
+  
+    // --- Controls ---
+    // hindari repeat saat key ditahan
+    let pressed = new Set();
+  
+    $(document).on('keydown', function(e){
+      if (pressed.has(e.code)) return;
+      pressed.add(e.code);
+  
+      if (finished && e.key === 'Enter'){ reset(); return; }
+  
+      if (finished) return;
+  
+      if (e.key === '2' || e.code === 'Digit1' || e.code === 'Numpad1'){
+        if(pageStatus == 'gameplay'){
+            greenAngle -= step;
+            if (greenAngle <= 0) greenAngle = 0; // clamp
+            draw();
+            checkWin();
+            e.preventDefault();
+        }else{
+            onKey2();
+        }
+      }
+      
+      if (e.key === '1' || e.code === 'Digit2' || e.code === 'Numpad2'){
+        if(pageStatus == 'gameplay'){
+            purpleAngle += step;
+            if (purpleAngle >= 360) purpleAngle = 360; // clamp
+            draw();
+            checkWin();
+            e.preventDefault();
+        }else{
+            onKey1();
+        }
+      }
+      if (e.key === 'Enter'){
+        reset();
+      }
+    });
+  
+    $(document).on('keyup', function(e){
+      pressed.delete(e.code);
+    });
+  
+    // init
+    draw();
