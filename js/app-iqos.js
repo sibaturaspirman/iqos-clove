@@ -285,3 +285,49 @@ function onKey2() {
   
     // init
     draw();
+
+
+
+    // ====== STATUS SLIDES (3 TEKS LOOPING) ======
+    const $status = $("#statusText");
+const statusSlides = [
+    'KEEP YOUR<br> CURIOSITY LEVEL<br>HIGH!',
+    'EVERY BURST<br>REVEALS MORE',
+    'STAY CURIOUS,<br/>STAY AHEAD'
+  ];
+  
+  let slideIdx = 0;
+  let slideTimer = null;
+  
+  // pakai ini untuk set teks satu kali (tanpa ganggu loop)
+  function setStatus(msg){
+    $status.stop(true, true).html(msg).show();
+  }
+  
+  // jalankan loop teks
+  function startStatusLoop() {
+    stopStatusLoop(); // clear dulu
+  
+    const cycle = () => {
+      if (finished) return; // otomatis berhenti kalau game selesai
+      slideIdx = (slideIdx) % statusSlides.length;
+      const nextHtml = statusSlides[slideIdx];
+  
+      // fade out -> ganti text -> fade in -> tunggu -> lanjut
+      $status.fadeOut(220, function(){
+        $status.html(nextHtml).fadeIn(220, function(){
+          slideIdx++;
+          slideTimer = setTimeout(cycle, 2400); // jeda antar slide
+        });
+      });
+    };
+  
+    // mulai langsung
+    cycle();
+  }
+  startStatusLoop();
+  
+  function stopStatusLoop(){
+    if (slideTimer){ clearTimeout(slideTimer); slideTimer = null; }
+    $status.stop(true, true); // hentikan animasi yang tertunda
+  }
