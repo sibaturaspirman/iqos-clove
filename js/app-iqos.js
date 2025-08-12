@@ -358,6 +358,284 @@ const statusSlides = [
   }
 
 // INTEGRASI ARDUINO
+// let port;
+// let reader;
+// let keepReading = false;
+
+// const connectButton = document.getElementById('connectButton');
+// const statusDiv = document.getElementById('status');
+// const buttonStatusDiv = document.getElementById('buttonStatus');
+
+// // Attempt to auto-connect to previously authorized port
+// async function tryAutoConnect() {
+//     try {
+//         const ports = await navigator.serial.getPorts();
+//         if (ports.length > 0) {
+//             port = ports[0]; // Use the first authorized port
+//             await port.open({ baudRate: 9600 });
+//             statusDiv.textContent = 'Auto-Connected to Arduino';
+//             connectButton.textContent = 'Disconnect';
+//             keepReading = true;
+//             readSerialData();
+//         } else {
+//             statusDiv.textContent = 'No authorized ports found. Click Connect to select.';
+//         }
+//     } catch (error) {
+//     statusDiv.textContent = `Auto-Connect Error: ${error.message}. Click Connect.`;
+//     }
+// }
+
+// // Handle manual connect/disconnect
+// connectButton.addEventListener('click', async () => {
+//     if (!port) {
+//         try {
+//             port = await navigator.serial.requestPort({});
+//             await port.open({ baudRate: 9600 });
+//             statusDiv.textContent = 'Connected to Arduino';
+//             connectButton.textContent = 'Disconnect';
+//             keepReading = true;
+//             readSerialData();
+//         } catch (error) {
+//             statusDiv.textContent = `Error: ${error.message}`;
+//         }
+//     } else {
+//         keepReading = false;
+//         if (reader) {
+//             await reader.cancel();
+//             reader = null;
+//         }
+//         await port.close();
+//         port = null;
+//         statusDiv.textContent = 'Disconnected';
+//         connectButton.textContent = 'Connect to Arduino';
+//         buttonStatusDiv.textContent = 'Waiting for button data...';
+//     }
+// });
+
+// // Read serial data
+//  // anti-hold state: event hanya sekali per tekan
+// //  const RELEASE_GAP_MS = 10;        // “sunyi” minimal untuk dianggap release
+// //  const DEBOUNCE_DOWN_MS = 8;  // filter noise “down” super kecil
+// //  let held = { 1:false, 2:false };
+// //  let lastSeen = { 1:0, 2:0 };
+// //  let lastDownAt = { 1:0, 2:0 };
+
+// // function edgeDown(btn){
+// //     const now = performance.now();
+// //     if (now - lastDownAt[btn] < DEBOUNCE_DOWN_MS) return false;
+// //     lastDownAt[btn] = now; return true;
+// // }
+
+// async function readSerialData() {
+//     while (port.readable && keepReading) {
+//     reader = port.readable.getReader();
+//     try {
+//         while (true) {
+//         const { value, done } = await reader.read();
+//         if (done) {
+//             break;
+//         }
+//         const text = new TextDecoder().decode(value).trim();
+        
+//         // Handle multiple button states that might arrive together
+//         const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+        
+//         let button1Pressed = false;
+//         let button2Pressed = false;
+//         let statusMessage = '';
+        
+//         // Process each line of data
+//         lines.forEach(line => {
+//             if (line === 'BTN1') {
+//                 button1Pressed = true;
+//             } else if (line === 'BTN2') {
+//                 button2Pressed = true;
+//             } else if (line.includes('BTN1') && line.includes('BTN2')) {
+//                 // Handle if Arduino sends combined data like "BTN1,BTN2" or "BTN1+BTN2"
+//                 button1Pressed = true;
+//                 button2Pressed = true;
+//             }
+//         });
+
+//         // TERAKHIR
+//         // --- Rising-edge detector (persist tanpa ubah tempat lain)
+//         window._p1Prev ??= false;
+//         window._p2Prev ??= false;
+//         window._lastDownAt1 ??= 0;
+//         window._lastDownAt2 ??= 0;
+
+//         const now = performance.now();
+//         const DEBOUNCE_MS = 8; // micro debounce biar gak double trigger karena noise
+
+//         const down1 = button1Pressed && !window._p1Prev; // edge: false -> true
+//         const down2 = button2Pressed && !window._p2Prev;
+
+//         const ok1 = down1 && (now - window._lastDownAt1 > DEBOUNCE_MS);
+//         const ok2 = down2 && (now - window._lastDownAt2 > DEBOUNCE_MS);
+
+//         if (ok1 && ok2) {
+//             statusMessage = 'Both Buttons Pressed!';
+//             buttonStatusDiv.style.backgroundColor = '#ff9800';
+//             buttonStatusDiv.style.color = 'white';
+
+//             if (pageStatus == 'gameplay') {
+//                 try { hitSound.currentTime = 0; hitSound.play(); } catch(e){}
+//                 // both move
+//                 purpleAngle += step; if (purpleAngle >= 360) purpleAngle = 360;
+//                 greenAngle  -= step; if (greenAngle  <=   0) greenAngle  =   0;
+//                 draw(); checkWin();
+//             }
+//             window._lastDownAt1 = now;
+//             window._lastDownAt2 = now;
+
+//         } else if (ok1) {
+//             statusMessage = 'Button 1 Pressed';
+//             buttonStatusDiv.style.backgroundColor = '#4CAF50';
+//             buttonStatusDiv.style.color = 'white';
+//             console.log("BTN1 PRESSED"); console.log("PAGE : " + pageStatus);
+
+//             if (pageStatus == 'gameplay') {
+//                 try { hitSound.currentTime = 0; hitSound.play(); } catch(e){}
+//                 purpleAngle += step; if (purpleAngle >= 360) purpleAngle = 360;
+//                 console.log("PRESS GREEN : " + purpleAngle);
+//                 draw(); checkWin();
+//             } else {
+//                 onKey1();
+//             }
+//             window._lastDownAt1 = now;
+
+//         } else if (ok2) {
+//             statusMessage = 'Button 2 Pressed';
+//             buttonStatusDiv.style.backgroundColor = '#2196F3';
+//             buttonStatusDiv.style.color = 'white';
+//             console.log("BTN2 PRESSED"); console.log("PAGE : " + pageStatus);
+
+//             if (pageStatus == 'gameplay') {
+//                 try { hitSound.currentTime = 0; hitSound.play(); } catch(e){}
+//                 greenAngle -= step; if (greenAngle <= 0) greenAngle = 0;
+//                 console.log("PRESS PURPLE : " + greenAngle);
+//                 draw(); checkWin();
+//             } else {
+//                 onKey2();
+//             }
+//             window._lastDownAt2 = now;
+//         }
+
+//         // update state untuk edge detector (wajib di akhir blok)
+//         window._p1Prev = button1Pressed;
+//         window._p2Prev = button2Pressed;
+//         // TERAKHIR
+
+//         // const now = performance.now();
+//         // if (button1Pressed) lastSeen[1] = now;
+//         // if (button2Pressed) lastSeen[2] = now;
+
+//         // // rilis: jika sunyi > gap → boleh trigger lagi
+//         // if (now - lastSeen[1] > RELEASE_GAP_MS) held[1] = false;
+//         // if (now - lastSeen[2] > RELEASE_GAP_MS) held[2] = false;
+        
+//         // Update status based on what buttons are pressed
+//         // if (button1Pressed && button2Pressed) {
+//         //     statusMessage = 'Both Buttons Pressed!';
+//         //     buttonStatusDiv.style.backgroundColor = '#ff9800';
+//         //     buttonStatusDiv.style.color = 'white';
+
+//         //     // HANDLE PRESS GAME
+//         //     if(pageStatus == 'gameplay'){
+//         //         // if (!held[1] && !held[2] && edgeDown(1) && edgeDown(2)) {
+//         //             // hitSound.play()
+//         //             purpleAngle += step;
+//         //             if (purpleAngle >= 360) purpleAngle = 360; // clamp
+
+//         //             greenAngle -= step;
+//         //             if (greenAngle <= 0) greenAngle = 0; // clamp
+
+//         //             draw();
+//         //             checkWin();
+
+//         //             // held[1] = held[2] = true;
+//         //         // }
+//         //     }
+//         // } else if (button1Pressed) {
+//         //     statusMessage = 'Button 1 Pressed';
+//         //     buttonStatusDiv.style.backgroundColor = '#4CAF50';
+//         //     buttonStatusDiv.style.color = 'white';
+//         //     console.log("BTN1 PRESSED")
+//         //     console.log("PAGE : "+pageStatus)
+
+//         //     // HANDLE PRESS GAME
+//         //     if(pageStatus == 'gameplay'){
+//         //         // if (!held[1] && edgeDown(1)) { 
+//         //             // hitSound.play()
+//         //             purpleAngle += step;
+//         //             if (purpleAngle >= 360) purpleAngle = 360; // clamp
+    
+//         //             console.log("PRESS GREEN : "+purpleAngle)
+    
+//         //             draw();
+//         //             checkWin();
+
+//         //         //     held[1] = true; 
+//         //         // }
+//         //     }else{
+//         //         onKey1();
+//         //     }
+
+
+//         // } else if (button2Pressed) {
+//         //     statusMessage = 'Button 2 Pressed';
+//         //     buttonStatusDiv.style.backgroundColor = '#2196F3';
+//         //     buttonStatusDiv.style.color = 'white';
+//         //     console.log("BTN2 PRESSED")
+//         //     console.log("PAGE : "+pageStatus)
+
+//         //     // HANDLE PRESS GAME
+//         //     if(pageStatus == 'gameplay'){
+//         //         // if (!held[2] && edgeDown(2)) {
+//         //             // hitSound.play()
+//         //             greenAngle -= step;
+//         //             if (greenAngle <= 0) greenAngle = 0; // clamp
+    
+//         //             console.log("PRESS PURPLE : "+greenAngle)
+    
+//         //             draw();
+//         //             checkWin();
+
+//         //         //     held[2] = true; 
+//         //         // }
+//         //     }else{
+//         //         onKey2();
+//         //     }
+//         // }
+        
+//         if (statusMessage) {
+//             buttonStatusDiv.textContent = statusMessage;
+            
+//             // Reset status after 500ms to show when buttons are released
+//             setTimeout(() => {
+//                 buttonStatusDiv.textContent = 'Waiting for button data...';
+//                 buttonStatusDiv.style.backgroundColor = 'white';
+//                 buttonStatusDiv.style.color = '#333';
+//             }, 500);
+//         }
+//         }
+//     } catch (error) {
+//         statusDiv.textContent = `Error reading data: ${error.message}`;
+//         keepReading = false;
+//         port = null;
+//         connectButton.textContent = 'Connect to Arduino';
+//     } finally {
+//         reader.releaseLock();
+//     }
+//     }
+// }
+
+// // Start auto-connect on page load
+// window.addEventListener('load', tryAutoConnect);
+
+
+
+// INTEGRASI ARDUINO
 let port;
 let reader;
 let keepReading = false;
@@ -366,268 +644,189 @@ const connectButton = document.getElementById('connectButton');
 const statusDiv = document.getElementById('status');
 const buttonStatusDiv = document.getElementById('buttonStatus');
 
+// State for button press and release tracking
+const buttonState = {
+  p1Prev: false,
+  p2Prev: false,
+  lastDownAt1: 0,
+  lastDownAt2: 0,
+  lastReleaseAt1: 0,
+  lastReleaseAt2: 0
+};
+
 // Attempt to auto-connect to previously authorized port
 async function tryAutoConnect() {
-    try {
-        const ports = await navigator.serial.getPorts();
-        if (ports.length > 0) {
-            port = ports[0]; // Use the first authorized port
-            await port.open({ baudRate: 9600 });
-            statusDiv.textContent = 'Auto-Connected to Arduino';
-            connectButton.textContent = 'Disconnect';
-            keepReading = true;
-            readSerialData();
-        } else {
-            statusDiv.textContent = 'No authorized ports found. Click Connect to select.';
-        }
-    } catch (error) {
-    statusDiv.textContent = `Auto-Connect Error: ${error.message}. Click Connect.`;
+  try {
+    const ports = await navigator.serial.getPorts();
+    if (ports.length > 0) {
+      port = ports[0]; // Use the first authorized port
+      await port.open({ baudRate: 9600 });
+      statusDiv.textContent = 'Auto-Connected to Arduino';
+      connectButton.textContent = 'Disconnect';
+      keepReading = true;
+      readSerialData();
+    } else {
+      statusDiv.textContent = 'No authorized ports found. Click Connect to select.';
     }
+  } catch (error) {
+    statusDiv.textContent = `Auto-Connect Error: ${error.message}. Click Connect.`;
+  }
 }
 
 // Handle manual connect/disconnect
 connectButton.addEventListener('click', async () => {
-    if (!port) {
-        try {
-            port = await navigator.serial.requestPort({});
-            await port.open({ baudRate: 9600 });
-            statusDiv.textContent = 'Connected to Arduino';
-            connectButton.textContent = 'Disconnect';
-            keepReading = true;
-            readSerialData();
-        } catch (error) {
-            statusDiv.textContent = `Error: ${error.message}`;
-        }
-    } else {
-        keepReading = false;
-        if (reader) {
-            await reader.cancel();
-            reader = null;
-        }
-        await port.close();
-        port = null;
-        statusDiv.textContent = 'Disconnected';
-        connectButton.textContent = 'Connect to Arduino';
-        buttonStatusDiv.textContent = 'Waiting for button data...';
+  if (!port) {
+    try {
+      port = await navigator.serial.requestPort({});
+      await port.open({ baudRate: 9600 });
+      statusDiv.textContent = 'Connected to Arduino';
+      connectButton.textContent = 'Disconnect';
+      keepReading = true;
+      readSerialData();
+    } catch (error) {
+      statusDiv.textContent = `Error: ${error.message}`;
     }
+  } else {
+    keepReading = false;
+    if (reader) {
+      await reader.cancel();
+      reader = null;
+    }
+    await port.close();
+    port = null;
+    statusDiv.textContent = 'Disconnected';
+    connectButton.textContent = 'Connect to Arduino';
+    buttonStatusDiv.textContent = 'Waiting for button data...';
+  }
 });
 
 // Read serial data
- // anti-hold state: event hanya sekali per tekan
-//  const RELEASE_GAP_MS = 10;        // “sunyi” minimal untuk dianggap release
-//  const DEBOUNCE_DOWN_MS = 8;  // filter noise “down” super kecil
-//  let held = { 1:false, 2:false };
-//  let lastSeen = { 1:0, 2:0 };
-//  let lastDownAt = { 1:0, 2:0 };
-
-// function edgeDown(btn){
-//     const now = performance.now();
-//     if (now - lastDownAt[btn] < DEBOUNCE_DOWN_MS) return false;
-//     lastDownAt[btn] = now; return true;
-// }
-
 async function readSerialData() {
-    while (port.readable && keepReading) {
-    reader = port.readable.getReader();
-    try {
-        while (true) {
-        const { value, done } = await reader.read();
-        if (done) {
-            break;
+  if (!port.readable || !keepReading) return;
+  reader = port.readable.getReader();
+  let statusTimeout;
+
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      const text = new TextDecoder().decode(value).trim();
+      const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+
+      let button1Pressed = false;
+      let button2Pressed = false;
+      let statusMessage = '';
+
+      // Process each line of data
+      lines.forEach(line => {
+        if (line.match(/BTN1/)) button1Pressed = true;
+        if (line.match(/BTN2/)) button2Pressed = true;
+      });
+
+      const now = performance.now();
+      const DEBOUNCE_MS = 8; // Debounce period for noise filtering
+      const RELEASE_GAP_MS = 50; // Minimum time after release before next press is valid
+
+      // Detect rising edges (false -> true) for button presses
+      const down1 = button1Pressed && !buttonState.p1Prev;
+      const down2 = button2Pressed && !buttonState.p2Prev;
+
+      // Check if press is valid: debounce and release gap
+      const ok1 = down1 && (now - buttonState.lastDownAt1 > DEBOUNCE_MS) && (now - buttonState.lastReleaseAt1 > RELEASE_GAP_MS);
+      const ok2 = down2 && (now - buttonState.lastDownAt2 > DEBOUNCE_MS) && (now - buttonState.lastReleaseAt2 > RELEASE_GAP_MS);
+
+      if (ok1 && ok2) {
+        statusMessage = 'Both Buttons Pressed!';
+        buttonStatusDiv.style.backgroundColor = '#ff9800';
+        buttonStatusDiv.style.color = 'white';
+        if (pageStatus === 'gameplay') {
+          try {
+            hitSound.currentTime = 0;
+            hitSound.play();
+          } catch (e) {
+            console.error('Audio playback failed:', e);
+          }
+          purpleAngle += step;
+          if (purpleAngle >= 360) purpleAngle = 360;
+          greenAngle -= step;
+          if (greenAngle <= 0) greenAngle = 0;
+          draw();
+          checkWin();
         }
-        const text = new TextDecoder().decode(value).trim();
-        
-        // Handle multiple button states that might arrive together
-        const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-        
-        let button1Pressed = false;
-        let button2Pressed = false;
-        let statusMessage = '';
-        
-        // Process each line of data
-        lines.forEach(line => {
-            if (line === 'BTN1') {
-                button1Pressed = true;
-            } else if (line === 'BTN2') {
-                button2Pressed = true;
-            } else if (line.includes('BTN1') && line.includes('BTN2')) {
-                // Handle if Arduino sends combined data like "BTN1,BTN2" or "BTN1+BTN2"
-                button1Pressed = true;
-                button2Pressed = true;
-            }
-        });
-
-        // TERAKHIR
-        // --- Rising-edge detector (persist tanpa ubah tempat lain)
-        window._p1Prev ??= false;
-        window._p2Prev ??= false;
-        window._lastDownAt1 ??= 0;
-        window._lastDownAt2 ??= 0;
-
-        const now = performance.now();
-        const DEBOUNCE_MS = 8; // micro debounce biar gak double trigger karena noise
-
-        const down1 = button1Pressed && !window._p1Prev; // edge: false -> true
-        const down2 = button2Pressed && !window._p2Prev;
-
-        const ok1 = down1 && (now - window._lastDownAt1 > DEBOUNCE_MS);
-        const ok2 = down2 && (now - window._lastDownAt2 > DEBOUNCE_MS);
-
-        if (ok1 && ok2) {
-            statusMessage = 'Both Buttons Pressed!';
-            buttonStatusDiv.style.backgroundColor = '#ff9800';
-            buttonStatusDiv.style.color = 'white';
-
-            if (pageStatus == 'gameplay') {
-                try { hitSound.currentTime = 0; hitSound.play(); } catch(e){}
-                // both move
-                purpleAngle += step; if (purpleAngle >= 360) purpleAngle = 360;
-                greenAngle  -= step; if (greenAngle  <=   0) greenAngle  =   0;
-                draw(); checkWin();
-            }
-            window._lastDownAt1 = now;
-            window._lastDownAt2 = now;
-
-        } else if (ok1) {
-            statusMessage = 'Button 1 Pressed';
-            buttonStatusDiv.style.backgroundColor = '#4CAF50';
-            buttonStatusDiv.style.color = 'white';
-            console.log("BTN1 PRESSED"); console.log("PAGE : " + pageStatus);
-
-            if (pageStatus == 'gameplay') {
-                try { hitSound.currentTime = 0; hitSound.play(); } catch(e){}
-                purpleAngle += step; if (purpleAngle >= 360) purpleAngle = 360;
-                console.log("PRESS GREEN : " + purpleAngle);
-                draw(); checkWin();
-            } else {
-                onKey1();
-            }
-            window._lastDownAt1 = now;
-
-        } else if (ok2) {
-            statusMessage = 'Button 2 Pressed';
-            buttonStatusDiv.style.backgroundColor = '#2196F3';
-            buttonStatusDiv.style.color = 'white';
-            console.log("BTN2 PRESSED"); console.log("PAGE : " + pageStatus);
-
-            if (pageStatus == 'gameplay') {
-                try { hitSound.currentTime = 0; hitSound.play(); } catch(e){}
-                greenAngle -= step; if (greenAngle <= 0) greenAngle = 0;
-                console.log("PRESS PURPLE : " + greenAngle);
-                draw(); checkWin();
-            } else {
-                onKey2();
-            }
-            window._lastDownAt2 = now;
+        buttonState.lastDownAt1 = now;
+        buttonState.lastDownAt2 = now;
+      } else if (ok1) {
+        statusMessage = 'Button 1 Pressed';
+        buttonStatusDiv.style.backgroundColor = '#4CAF50';
+        buttonStatusDiv.style.color = 'white';
+        console.log("BTN1 PRESSED", "PAGE:", pageStatus);
+        if (pageStatus === 'gameplay') {
+          try {
+            hitSound.currentTime = 0;
+            hitSound.play();
+          } catch (e) {
+            console.error('Audio playback failed:', e);
+          }
+          purpleAngle += step;
+          if (purpleAngle >= 360) purpleAngle = 360;
+          console.log("PRESS GREEN:", purpleAngle);
+          draw();
+          checkWin();
+        } else {
+          onKey1();
         }
-
-        // update state untuk edge detector (wajib di akhir blok)
-        window._p1Prev = button1Pressed;
-        window._p2Prev = button2Pressed;
-        // TERAKHIR
-
-        // const now = performance.now();
-        // if (button1Pressed) lastSeen[1] = now;
-        // if (button2Pressed) lastSeen[2] = now;
-
-        // // rilis: jika sunyi > gap → boleh trigger lagi
-        // if (now - lastSeen[1] > RELEASE_GAP_MS) held[1] = false;
-        // if (now - lastSeen[2] > RELEASE_GAP_MS) held[2] = false;
-        
-        // Update status based on what buttons are pressed
-        // if (button1Pressed && button2Pressed) {
-        //     statusMessage = 'Both Buttons Pressed!';
-        //     buttonStatusDiv.style.backgroundColor = '#ff9800';
-        //     buttonStatusDiv.style.color = 'white';
-
-        //     // HANDLE PRESS GAME
-        //     if(pageStatus == 'gameplay'){
-        //         // if (!held[1] && !held[2] && edgeDown(1) && edgeDown(2)) {
-        //             // hitSound.play()
-        //             purpleAngle += step;
-        //             if (purpleAngle >= 360) purpleAngle = 360; // clamp
-
-        //             greenAngle -= step;
-        //             if (greenAngle <= 0) greenAngle = 0; // clamp
-
-        //             draw();
-        //             checkWin();
-
-        //             // held[1] = held[2] = true;
-        //         // }
-        //     }
-        // } else if (button1Pressed) {
-        //     statusMessage = 'Button 1 Pressed';
-        //     buttonStatusDiv.style.backgroundColor = '#4CAF50';
-        //     buttonStatusDiv.style.color = 'white';
-        //     console.log("BTN1 PRESSED")
-        //     console.log("PAGE : "+pageStatus)
-
-        //     // HANDLE PRESS GAME
-        //     if(pageStatus == 'gameplay'){
-        //         // if (!held[1] && edgeDown(1)) { 
-        //             // hitSound.play()
-        //             purpleAngle += step;
-        //             if (purpleAngle >= 360) purpleAngle = 360; // clamp
-    
-        //             console.log("PRESS GREEN : "+purpleAngle)
-    
-        //             draw();
-        //             checkWin();
-
-        //         //     held[1] = true; 
-        //         // }
-        //     }else{
-        //         onKey1();
-        //     }
-
-
-        // } else if (button2Pressed) {
-        //     statusMessage = 'Button 2 Pressed';
-        //     buttonStatusDiv.style.backgroundColor = '#2196F3';
-        //     buttonStatusDiv.style.color = 'white';
-        //     console.log("BTN2 PRESSED")
-        //     console.log("PAGE : "+pageStatus)
-
-        //     // HANDLE PRESS GAME
-        //     if(pageStatus == 'gameplay'){
-        //         // if (!held[2] && edgeDown(2)) {
-        //             // hitSound.play()
-        //             greenAngle -= step;
-        //             if (greenAngle <= 0) greenAngle = 0; // clamp
-    
-        //             console.log("PRESS PURPLE : "+greenAngle)
-    
-        //             draw();
-        //             checkWin();
-
-        //         //     held[2] = true; 
-        //         // }
-        //     }else{
-        //         onKey2();
-        //     }
-        // }
-        
-        if (statusMessage) {
-            buttonStatusDiv.textContent = statusMessage;
-            
-            // Reset status after 500ms to show when buttons are released
-            setTimeout(() => {
-                buttonStatusDiv.textContent = 'Waiting for button data...';
-                buttonStatusDiv.style.backgroundColor = 'white';
-                buttonStatusDiv.style.color = '#333';
-            }, 500);
+        buttonState.lastDownAt1 = now;
+      } else if (ok2) {
+        statusMessage = 'Button 2 Pressed';
+        buttonStatusDiv.style.backgroundColor = '#2196F3';
+        buttonStatusDiv.style.color = 'white';
+        console.log("BTN2 PRESSED", "PAGE:", pageStatus);
+        if (pageStatus === 'gameplay') {
+          try {
+            hitSound.currentTime = 0;
+            hitSound.play();
+          } catch (e) {
+            console.error('Audio playback failed:', e);
+          }
+          greenAngle -= step;
+          if (greenAngle <= 0) greenAngle = 0;
+          console.log("PRESS PURPLE:", greenAngle);
+          draw();
+          checkWin();
+        } else {
+          onKey2();
         }
-        }
-    } catch (error) {
-        statusDiv.textContent = `Error reading data: ${error.message}`;
-        keepReading = false;
-        port = null;
-        connectButton.textContent = 'Connect to Arduino';
-    } finally {
-        reader.releaseLock();
+        buttonState.lastDownAt2 = now;
+      }
+
+      // Update release times when buttons are not pressed
+      if (!button1Pressed) buttonState.lastReleaseAt1 = now;
+      if (!button2Pressed) buttonState.lastReleaseAt2 = now;
+
+      // Update previous state for edge detection
+      buttonState.p1Prev = button1Pressed;
+      buttonState.p2Prev = button2Pressed;
+
+      // Update UI with status message
+      if (statusMessage) {
+        buttonStatusDiv.textContent = statusMessage;
+        clearTimeout(statusTimeout);
+        statusTimeout = setTimeout(() => {
+          buttonStatusDiv.textContent = 'Waiting for button data...';
+          buttonStatusDiv.style.backgroundColor = 'white';
+          buttonStatusDiv.style.color = '#333';
+        }, 500);
+      }
     }
-    }
+  } catch (error) {
+    statusDiv.textContent = `Error reading data: ${error.message}`;
+    keepReading = false;
+    port = null;
+    connectButton.textContent = 'Connect to Arduino';
+  } finally {
+    reader.releaseLock();
+  }
 }
 
 // Start auto-connect on page load
