@@ -231,7 +231,7 @@ function onKey2() {
         if (finished) return;
         if (greenAngle <= 0 && purpleAngle >= 360){
           finished = true;
-          setStatus('🤝 Draw! Kalian bertemu di puncak');
+        //   setStatus('🤝 Draw! Kalian bertemu di puncak');
         } else if (greenAngle <= 0){
           finished = true;
           console.log("PURPLE MENANG")
@@ -468,6 +468,7 @@ async function readSerialData() {
             buttonStatusDiv.style.backgroundColor = '#4CAF50';
             buttonStatusDiv.style.color = 'white';
             console.log("BTN1 PRESSED")
+            console.log("PAGE : "+pageStatus)
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
@@ -484,11 +485,13 @@ async function readSerialData() {
                 onKey1();
             }
 
+
         } else if (button2Pressed) {
             statusMessage = 'Button 2 Pressed';
             buttonStatusDiv.style.backgroundColor = '#2196F3';
             buttonStatusDiv.style.color = 'white';
             console.log("BTN2 PRESSED")
+            console.log("PAGE : "+pageStatus)
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
