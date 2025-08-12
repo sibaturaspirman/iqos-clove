@@ -451,18 +451,18 @@ async function readSerialData() {
             buttonStatusDiv.style.color = 'white';
 
             // HANDLE PRESS GAME
-            if(pageStatus == 'gameplay'){
-                hitSound.play()
-                purpleAngle += step;
-                if (purpleAngle >= 360) purpleAngle = 360; // clamp
+            // if(pageStatus == 'gameplay'){
+            //     hitSound.play()
+            //     purpleAngle += step;
+            //     if (purpleAngle >= 360) purpleAngle = 360; // clamp
 
-                greenAngle -= step;
-                if (greenAngle <= 0) greenAngle = 0; // clamp
+            //     greenAngle -= step;
+            //     if (greenAngle <= 0) greenAngle = 0; // clamp
 
-                draw();
-                checkWin();
-                e.preventDefault();
-            }
+            //     draw();
+            //     checkWin();
+            //     e.preventDefault();
+            // }
         } else if (button1Pressed) {
             hitSound.play()
             statusMessage = 'Button 1 Pressed';
@@ -473,6 +473,9 @@ async function readSerialData() {
             if(pageStatus == 'gameplay'){
                 purpleAngle += step;
                 if (purpleAngle >= 360) purpleAngle = 360; // clamp
+
+                console.log("PRESS GREEN : "+purpleAngle)
+
                 draw();
                 checkWin();
                 e.preventDefault();
@@ -489,6 +492,9 @@ async function readSerialData() {
             if(pageStatus == 'gameplay'){
                 greenAngle -= step;
                 if (greenAngle <= 0) greenAngle = 0; // clamp
+
+                console.log("PRESS PURPLE : "+greenAngle)
+
                 draw();
                 checkWin();
                 e.preventDefault();
