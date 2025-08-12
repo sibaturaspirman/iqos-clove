@@ -479,7 +479,7 @@ async function readSerialData() {
 
                 draw();
                 checkWin();
-                e.preventDefault();
+                // e.preventDefault();
             }else{
                 onKey1();
             }
@@ -500,7 +500,7 @@ async function readSerialData() {
 
                 draw();
                 checkWin();
-                e.preventDefault();
+                // e.preventDefault();
             }else{
                 onKey2();
             }
