@@ -435,12 +435,22 @@ async function readSerialData() {
         lines.forEach(line => {
             if (line === 'BTN1') {
                 button1Pressed = true;
+                setTimeout(() => {
+                    button1Pressed = false;
+                }, 350);
             } else if (line === 'BTN2') {
                 button2Pressed = true;
+                setTimeout(() => {
+                    button2Pressed = false;
+                }, 350);
             } else if (line.includes('BTN1') && line.includes('BTN2')) {
                 // Handle if Arduino sends combined data like "BTN1,BTN2" or "BTN1+BTN2"
                 button1Pressed = true;
                 button2Pressed = true;
+                setTimeout(() => {
+                    button1Pressed = false;
+                    button2Pressed = false;
+                }, 350);
             }
         });
         
