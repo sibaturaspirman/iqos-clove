@@ -14,11 +14,13 @@ sass --watch scss:css
 asepirman
 Y7gc82-P_rzFyLsWKAsr
 
+GENERATE STATIC PWA : workbox generateSW
+
 ## HAVE TO FIXED
 1. 
 
 ## ToDo
-1. FRAME BOLONG
-2. EMBED SCRIPT BUTTON
-3. PWA
-4. ADD SFX PROVER
+1. FRAME BOLONG ✅
+2. EMBED SCRIPT BUTTON ✅
+3. PWA ✅
+4. ADD SFX PROVER ✅

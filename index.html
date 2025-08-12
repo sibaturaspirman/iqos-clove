@@ -1,12 +1,11 @@
-<!-- //(v.0.0.1) ...................................................antigravity.id..........................................................-->
+<!-- //(v.0.1) ...................................................antigravity.id..........................................................-->
 <!DOCTYPE html>
 <html>
 <head>
-	<title>IQOS CLOVE (v.0.0.1)</title>
+	<title>(v.0.1) IQOS CLOVE</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-	<link rel="shortcut icon" href="assets/images/favicon.png"/>
-    <link rel="apple-touch-icon" href="assets/images/favicon.png">
+	<link rel="shortcut icon" href="assets/images/icon-192.png"/>
 
 	<meta name="description" content="An interactive game. Come on, play this game" />
     <link rel="stylesheet" href="css/main.css">
@@ -25,9 +24,6 @@
 
 </head>
 <body style="background-color: #000;">
-    <!-- MODAL -->
-    <div class="overlayGame hide" id="overlayGame">&nbsp;</div>
-    <!-- !MODAL -->
 
     <div class="framebolong">
         <div class="block-image"><img src="./assets/images/FRAME-BOLONG.png" alt="Kalbe"></div>
@@ -41,6 +37,15 @@
                     <video src="./assets/videos/00. Looping Background Default_08AUG.mp4" preload="auto" loop playsinline autoplay id="videoFront"></video>
     
                     <p class="animScale" style="position: absolute;bottom: 7rem;left: 0;right: 0;text-align: center;font-size: 4vw;">Press button to start</p>
+                </div>
+            </div>
+        </div>
+        <div class="section hide" id="sectionSetup">
+            <div class="frame">
+                <div class="inner setup">
+                    <button id="connectButton">Connect to Arduino</button>
+                    <div id="status">Attempting to connect...</div>
+                    <div id="buttonStatus">Waiting for button data...</div>
                 </div>
             </div>
         </div>
@@ -133,5 +138,12 @@
     <!-- !GAMEPLAY -->
 
     <script type="text/javascript" src="js/app-iqos.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('sw.js')
+            .then(() => console.log('✅ Service Worker Registered v0.2'))
+            .catch(err => console.error('❌ SW registration failed:', err));
+        }
+    </script>
 </body>
 </html>

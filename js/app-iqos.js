@@ -14,8 +14,17 @@ var perfectSound = new Howl({
 var btnSound = new Howl({
     src: ['./assets/audios/click.mp3']
 });
+var countSound = new Howl({
+    src: ['./assets/audios/NEW-COUNTDOWN.mp3']
+});
+var hitSound = new Howl({
+    src: ['./assets/audios/hit.mp3']
+});
+var transisiSound = new Howl({
+    src: ['./assets/audios/NEW-TRANSITION.mp3']
+});
 
-let pageStatus = 'home', statusPlayer1 = false, statusPlayer2 = false
+let pageStatus = 'home', statusPlayer1 = false, statusPlayer2 = false, statusSetup = false
 
 function pageStart(player){
     btnSound.play()
@@ -42,6 +51,7 @@ function pageStart(player){
 
 function goToCountdown(){
     btnSound.play()
+    countSound.play()
     document.getElementById('videoCountdown').play()
     pageStatus = 'countdown'
     $("#sectionWaitingPlayer").addClass("hide")
@@ -63,6 +73,7 @@ function goToGameplay(){
 
 function gameEnd(win){
     perfectSound.play()
+    transisiSound.play()
     finished = false
     reset()
     pageStatus = 'endGame'
@@ -253,6 +264,7 @@ function onKey2() {
   
       if (e.key === '2' || e.code === 'Digit1' || e.code === 'Numpad1'){
         if(pageStatus == 'gameplay'){
+            hitSound.play()
             greenAngle -= step;
             if (greenAngle <= 0) greenAngle = 0; // clamp
             draw();
@@ -265,6 +277,7 @@ function onKey2() {
       
       if (e.key === '1' || e.code === 'Digit2' || e.code === 'Numpad2'){
         if(pageStatus == 'gameplay'){
+            hitSound.play()
             purpleAngle += step;
             if (purpleAngle >= 360) purpleAngle = 360; // clamp
             draw();
@@ -276,6 +289,18 @@ function onKey2() {
       }
       if (e.key === 'Enter'){
         reset();
+      }
+      if (e.key === 's'){
+        if(!statusSetup){
+            statusSetup = true
+            $("#sectionSetup").removeClass('hide')
+        }else{
+            statusSetup = false
+            $("#sectionSetup").addClass('hide')
+        }
+      }
+      if (e.key === 'r'){
+        location.reload()
       }
     });
   
@@ -331,3 +356,168 @@ const statusSlides = [
     if (slideTimer){ clearTimeout(slideTimer); slideTimer = null; }
     $status.stop(true, true); // hentikan animasi yang tertunda
   }
+
+// INTEGRASI ARDUINO
+let port;
+let reader;
+let keepReading = false;
+
+const connectButton = document.getElementById('connectButton');
+const statusDiv = document.getElementById('status');
+const buttonStatusDiv = document.getElementById('buttonStatus');
+
+// Attempt to auto-connect to previously authorized port
+async function tryAutoConnect() {
+    try {
+        const ports = await navigator.serial.getPorts();
+        if (ports.length > 0) {
+            port = ports[0]; // Use the first authorized port
+            await port.open({ baudRate: 9600 });
+            statusDiv.textContent = 'Auto-Connected to Arduino';
+            connectButton.textContent = 'Disconnect';
+            keepReading = true;
+            readSerialData();
+        } else {
+            statusDiv.textContent = 'No authorized ports found. Click Connect to select.';
+        }
+    } catch (error) {
+    statusDiv.textContent = `Auto-Connect Error: ${error.message}. Click Connect.`;
+    }
+}
+
+// Handle manual connect/disconnect
+connectButton.addEventListener('click', async () => {
+    if (!port) {
+        try {
+            port = await navigator.serial.requestPort({});
+            await port.open({ baudRate: 9600 });
+            statusDiv.textContent = 'Connected to Arduino';
+            connectButton.textContent = 'Disconnect';
+            keepReading = true;
+            readSerialData();
+        } catch (error) {
+            statusDiv.textContent = `Error: ${error.message}`;
+        }
+    } else {
+        keepReading = false;
+        if (reader) {
+            await reader.cancel();
+            reader = null;
+        }
+        await port.close();
+        port = null;
+        statusDiv.textContent = 'Disconnected';
+        connectButton.textContent = 'Connect to Arduino';
+        buttonStatusDiv.textContent = 'Waiting for button data...';
+    }
+});
+
+// Read serial data
+async function readSerialData() {
+    while (port.readable && keepReading) {
+    reader = port.readable.getReader();
+    try {
+        while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+            break;
+        }
+        const text = new TextDecoder().decode(value).trim();
+        
+        // Handle multiple button states that might arrive together
+        const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+        
+        let button1Pressed = false;
+        let button2Pressed = false;
+        let statusMessage = '';
+        
+        // Process each line of data
+        lines.forEach(line => {
+            if (line === 'BTN1') {
+                button1Pressed = true;
+            } else if (line === 'BTN2') {
+                button2Pressed = true;
+            } else if (line.includes('BTN1') && line.includes('BTN2')) {
+                // Handle if Arduino sends combined data like "BTN1,BTN2" or "BTN1+BTN2"
+                button1Pressed = true;
+                button2Pressed = true;
+            }
+        });
+        
+        // Update status based on what buttons are pressed
+        if (button1Pressed && button2Pressed) {
+            statusMessage = 'Both Buttons Pressed!';
+            buttonStatusDiv.style.backgroundColor = '#ff9800';
+            buttonStatusDiv.style.color = 'white';
+
+            // HANDLE PRESS GAME
+            if(pageStatus == 'gameplay'){
+                hitSound.play()
+                purpleAngle += step;
+                if (purpleAngle >= 360) purpleAngle = 360; // clamp
+
+                greenAngle -= step;
+                if (greenAngle <= 0) greenAngle = 0; // clamp
+
+                draw();
+                checkWin();
+                e.preventDefault();
+            }
+        } else if (button1Pressed) {
+            hitSound.play()
+            statusMessage = 'Button 1 Pressed';
+            buttonStatusDiv.style.backgroundColor = '#4CAF50';
+            buttonStatusDiv.style.color = 'white';
+
+            // HANDLE PRESS GAME
+            if(pageStatus == 'gameplay'){
+                purpleAngle += step;
+                if (purpleAngle >= 360) purpleAngle = 360; // clamp
+                draw();
+                checkWin();
+                e.preventDefault();
+            }else{
+                onKey1();
+            }
+
+        } else if (button2Pressed) {
+            statusMessage = 'Button 2 Pressed';
+            buttonStatusDiv.style.backgroundColor = '#2196F3';
+            buttonStatusDiv.style.color = 'white';
+
+            // HANDLE PRESS GAME
+            if(pageStatus == 'gameplay'){
+                greenAngle -= step;
+                if (greenAngle <= 0) greenAngle = 0; // clamp
+                draw();
+                checkWin();
+                e.preventDefault();
+            }else{
+                onKey2();
+            }
+        }
+        
+        if (statusMessage) {
+            buttonStatusDiv.textContent = statusMessage;
+            
+            // Reset status after 500ms to show when buttons are released
+            setTimeout(() => {
+                buttonStatusDiv.textContent = 'Waiting for button data...';
+                buttonStatusDiv.style.backgroundColor = 'white';
+                buttonStatusDiv.style.color = '#333';
+            }, 500);
+        }
+        }
+    } catch (error) {
+        statusDiv.textContent = `Error reading data: ${error.message}`;
+        keepReading = false;
+        port = null;
+        connectButton.textContent = 'Connect to Arduino';
+    } finally {
+        reader.releaseLock();
+    }
+    }
+}
+
+// Start auto-connect on page load
+window.addEventListener('load', tryAutoConnect);
