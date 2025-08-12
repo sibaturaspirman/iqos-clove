@@ -467,6 +467,7 @@ async function readSerialData() {
             statusMessage = 'Button 1 Pressed';
             buttonStatusDiv.style.backgroundColor = '#4CAF50';
             buttonStatusDiv.style.color = 'white';
+            console.log("BTN1 PRESSED")
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
@@ -487,6 +488,7 @@ async function readSerialData() {
             statusMessage = 'Button 2 Pressed';
             buttonStatusDiv.style.backgroundColor = '#2196F3';
             buttonStatusDiv.style.color = 'white';
+            console.log("BTN2 PRESSED")
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
