@@ -466,7 +466,7 @@ async function readSerialData() {
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
                 if (!held[1] && !held[2]) {
-                    hitSound.play()
+                    // hitSound.play()
                     purpleAngle += step;
                     if (purpleAngle >= 360) purpleAngle = 360; // clamp
 
@@ -489,7 +489,7 @@ async function readSerialData() {
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
                 if (!held[1]) { 
-                    hitSound.play()
+                    // hitSound.play()
                     purpleAngle += step;
                     if (purpleAngle >= 360) purpleAngle = 360; // clamp
     
@@ -515,7 +515,7 @@ async function readSerialData() {
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
                 if (!held[2]) {
-                    hitSound.play()
+                    // hitSound.play()
                     greenAngle -= step;
                     if (greenAngle <= 0) greenAngle = 0; // clamp
     
