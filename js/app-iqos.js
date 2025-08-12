@@ -473,7 +473,7 @@ async function readSerialData() {
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
-                if (!held[1] && !held[2] && edgeDown(1) && edgeDown(2)) {
+                // if (!held[1] && !held[2] && edgeDown(1) && edgeDown(2)) {
                     // hitSound.play()
                     purpleAngle += step;
                     if (purpleAngle >= 360) purpleAngle = 360; // clamp
@@ -484,8 +484,8 @@ async function readSerialData() {
                     draw();
                     checkWin();
 
-                    held[1] = held[2] = true;
-                }
+                    // held[1] = held[2] = true;
+                // }
             }
         } else if (button1Pressed) {
             statusMessage = 'Button 1 Pressed';
@@ -496,7 +496,7 @@ async function readSerialData() {
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
-                if (!held[1] && edgeDown(1)) { 
+                // if (!held[1] && edgeDown(1)) { 
                     // hitSound.play()
                     purpleAngle += step;
                     if (purpleAngle >= 360) purpleAngle = 360; // clamp
@@ -506,8 +506,8 @@ async function readSerialData() {
                     draw();
                     checkWin();
 
-                    held[1] = true; 
-                }
+                //     held[1] = true; 
+                // }
             }else{
                 onKey1();
             }
@@ -522,7 +522,7 @@ async function readSerialData() {
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
-                if (!held[2] && edgeDown(2)) {
+                // if (!held[2] && edgeDown(2)) {
                     // hitSound.play()
                     greenAngle -= step;
                     if (greenAngle <= 0) greenAngle = 0; // clamp
@@ -532,8 +532,8 @@ async function readSerialData() {
                     draw();
                     checkWin();
 
-                    held[2] = true; 
-                }
+                //     held[2] = true; 
+                // }
             }else{
                 onKey2();
             }
