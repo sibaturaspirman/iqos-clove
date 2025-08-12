@@ -451,18 +451,18 @@ async function readSerialData() {
             buttonStatusDiv.style.color = 'white';
 
             // HANDLE PRESS GAME
-            // if(pageStatus == 'gameplay'){
-            //     hitSound.play()
-            //     purpleAngle += step;
-            //     if (purpleAngle >= 360) purpleAngle = 360; // clamp
+            if(pageStatus == 'gameplay'){
+                hitSound.play()
+                purpleAngle += step;
+                if (purpleAngle >= 360) purpleAngle = 360; // clamp
 
-            //     greenAngle -= step;
-            //     if (greenAngle <= 0) greenAngle = 0; // clamp
+                greenAngle -= step;
+                if (greenAngle <= 0) greenAngle = 0; // clamp
 
-            //     draw();
-            //     checkWin();
-            //     e.preventDefault();
-            // }
+                draw();
+                checkWin();
+                // e.preventDefault();
+            }
         } else if (button1Pressed) {
             statusMessage = 'Button 1 Pressed';
             buttonStatusDiv.style.backgroundColor = '#4CAF50';
