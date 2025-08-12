@@ -414,7 +414,7 @@ connectButton.addEventListener('click', async () => {
 
 // Read serial data
  // anti-hold state: event hanya sekali per tekan
- const RELEASE_GAP_MS = 50;        // “sunyi” minimal untuk dianggap release
+ const RELEASE_GAP_MS = 10;        // “sunyi” minimal untuk dianggap release
  let held = { 1:false, 2:false };
  let lastSeen = { 1:0, 2:0 };
 
