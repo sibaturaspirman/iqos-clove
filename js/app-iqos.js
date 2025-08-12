@@ -415,8 +415,16 @@ connectButton.addEventListener('click', async () => {
 // Read serial data
  // anti-hold state: event hanya sekali per tekan
  const RELEASE_GAP_MS = 10;        // “sunyi” minimal untuk dianggap release
+ const DEBOUNCE_DOWN_MS = 8;  // filter noise “down” super kecil
  let held = { 1:false, 2:false };
  let lastSeen = { 1:0, 2:0 };
+ let lastDownAt = { 1:0, 2:0 };
+
+function edgeDown(btn){
+    const now = performance.now();
+    if (now - lastDownAt[btn] < DEBOUNCE_DOWN_MS) return false;
+    lastDownAt[btn] = now; return true;
+}
 
 async function readSerialData() {
     while (port.readable && keepReading) {
@@ -453,7 +461,7 @@ async function readSerialData() {
         if (button1Pressed) lastSeen[1] = now;
         if (button2Pressed) lastSeen[2] = now;
 
-        // release detection (sunyi > gap)
+        // rilis: jika sunyi > gap → boleh trigger lagi
         if (now - lastSeen[1] > RELEASE_GAP_MS) held[1] = false;
         if (now - lastSeen[2] > RELEASE_GAP_MS) held[2] = false;
         
@@ -465,7 +473,7 @@ async function readSerialData() {
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
-                if (!held[1] && !held[2]) {
+                if (!held[1] && !held[2] && edgeDown(1) && edgeDown(2)) {
                     // hitSound.play()
                     purpleAngle += step;
                     if (purpleAngle >= 360) purpleAngle = 360; // clamp
@@ -488,7 +496,7 @@ async function readSerialData() {
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
-                if (!held[1]) { 
+                if (!held[1] && edgeDown(1)) { 
                     // hitSound.play()
                     purpleAngle += step;
                     if (purpleAngle >= 360) purpleAngle = 360; // clamp
@@ -514,7 +522,7 @@ async function readSerialData() {
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
-                if (!held[2]) {
+                if (!held[2] && edgeDown(2)) {
                     // hitSound.play()
                     greenAngle -= step;
                     if (greenAngle <= 0) greenAngle = 0; // clamp
