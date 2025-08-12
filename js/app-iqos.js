@@ -413,6 +413,7 @@ connectButton.addEventListener('click', async () => {
 });
 
 // Read serial data
+let player1Press = false, player2Press = false
 async function readSerialData() {
     while (port.readable && keepReading) {
     reader = port.readable.getReader();
@@ -435,22 +436,12 @@ async function readSerialData() {
         lines.forEach(line => {
             if (line === 'BTN1') {
                 button1Pressed = true;
-                setTimeout(() => {
-                    button1Pressed = false;
-                }, 350);
             } else if (line === 'BTN2') {
                 button2Pressed = true;
-                setTimeout(() => {
-                    button2Pressed = false;
-                }, 350);
             } else if (line.includes('BTN1') && line.includes('BTN2')) {
                 // Handle if Arduino sends combined data like "BTN1,BTN2" or "BTN1+BTN2"
                 button1Pressed = true;
                 button2Pressed = true;
-                setTimeout(() => {
-                    button1Pressed = false;
-                    button2Pressed = false;
-                }, 350);
             }
         });
         
@@ -462,16 +453,24 @@ async function readSerialData() {
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
-                hitSound.play()
-                purpleAngle += step;
-                if (purpleAngle >= 360) purpleAngle = 360; // clamp
+                player1Press = true
+                player2Press = true
+                setTimeout(() => {
+                    player1Press = false
+                    player2Press = false
+                }, 500);
 
-                greenAngle -= step;
-                if (greenAngle <= 0) greenAngle = 0; // clamp
-
-                draw();
-                checkWin();
-                // e.preventDefault();
+                if(player1Press && player2Press){
+                    hitSound.play()
+                    purpleAngle += step;
+                    if (purpleAngle >= 360) purpleAngle = 360; // clamp
+    
+                    greenAngle -= step;
+                    if (greenAngle <= 0) greenAngle = 0; // clamp
+    
+                    draw();
+                    checkWin();
+                }
             }
         } else if (button1Pressed) {
             statusMessage = 'Button 1 Pressed';
@@ -482,15 +481,21 @@ async function readSerialData() {
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
-                hitSound.play()
-                purpleAngle += step;
-                if (purpleAngle >= 360) purpleAngle = 360; // clamp
+                player1Press = true
+                setTimeout(() => {
+                    player1Press = false
+                }, 500);
 
-                console.log("PRESS GREEN : "+purpleAngle)
-
-                draw();
-                checkWin();
-                // e.preventDefault();
+                if(player1Press){
+                    hitSound.play()
+                    purpleAngle += step;
+                    if (purpleAngle >= 360) purpleAngle = 360; // clamp
+    
+                    console.log("PRESS GREEN : "+purpleAngle)
+    
+                    draw();
+                    checkWin();
+                }
             }else{
                 onKey1();
             }
@@ -505,15 +510,21 @@ async function readSerialData() {
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
-                hitSound.play()
-                greenAngle -= step;
-                if (greenAngle <= 0) greenAngle = 0; // clamp
+                player2Press = true
+                setTimeout(() => {
+                    player2Press = false
+                }, 500);
 
-                console.log("PRESS PURPLE : "+greenAngle)
-
-                draw();
-                checkWin();
-                // e.preventDefault();
+                if(player2Press){
+                    hitSound.play()
+                    greenAngle -= step;
+                    if (greenAngle <= 0) greenAngle = 0; // clamp
+    
+                    console.log("PRESS PURPLE : "+greenAngle)
+    
+                    draw();
+                    checkWin();
+                }
             }else{
                 onKey2();
             }
