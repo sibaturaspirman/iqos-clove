@@ -414,17 +414,17 @@ connectButton.addEventListener('click', async () => {
 
 // Read serial data
  // anti-hold state: event hanya sekali per tekan
- const RELEASE_GAP_MS = 10;        // “sunyi” minimal untuk dianggap release
- const DEBOUNCE_DOWN_MS = 8;  // filter noise “down” super kecil
- let held = { 1:false, 2:false };
- let lastSeen = { 1:0, 2:0 };
- let lastDownAt = { 1:0, 2:0 };
+//  const RELEASE_GAP_MS = 10;        // “sunyi” minimal untuk dianggap release
+//  const DEBOUNCE_DOWN_MS = 8;  // filter noise “down” super kecil
+//  let held = { 1:false, 2:false };
+//  let lastSeen = { 1:0, 2:0 };
+//  let lastDownAt = { 1:0, 2:0 };
 
-function edgeDown(btn){
-    const now = performance.now();
-    if (now - lastDownAt[btn] < DEBOUNCE_DOWN_MS) return false;
-    lastDownAt[btn] = now; return true;
-}
+// function edgeDown(btn){
+//     const now = performance.now();
+//     if (now - lastDownAt[btn] < DEBOUNCE_DOWN_MS) return false;
+//     lastDownAt[btn] = now; return true;
+// }
 
 async function readSerialData() {
     while (port.readable && keepReading) {
@@ -457,87 +457,156 @@ async function readSerialData() {
             }
         });
 
-        const now = performance.now();
-        if (button1Pressed) lastSeen[1] = now;
-        if (button2Pressed) lastSeen[2] = now;
+        // TERAKHIR
+        // --- Rising-edge detector (persist tanpa ubah tempat lain)
+        window._p1Prev ??= false;
+        window._p2Prev ??= false;
+        window._lastDownAt1 ??= 0;
+        window._lastDownAt2 ??= 0;
 
-        // rilis: jika sunyi > gap → boleh trigger lagi
-        if (now - lastSeen[1] > RELEASE_GAP_MS) held[1] = false;
-        if (now - lastSeen[2] > RELEASE_GAP_MS) held[2] = false;
-        
-        // Update status based on what buttons are pressed
-        if (button1Pressed && button2Pressed) {
+        const now = performance.now();
+        const DEBOUNCE_MS = 8; // micro debounce biar gak double trigger karena noise
+
+        const down1 = button1Pressed && !window._p1Prev; // edge: false -> true
+        const down2 = button2Pressed && !window._p2Prev;
+
+        const ok1 = down1 && (now - window._lastDownAt1 > DEBOUNCE_MS);
+        const ok2 = down2 && (now - window._lastDownAt2 > DEBOUNCE_MS);
+
+        if (ok1 && ok2) {
             statusMessage = 'Both Buttons Pressed!';
             buttonStatusDiv.style.backgroundColor = '#ff9800';
             buttonStatusDiv.style.color = 'white';
 
-            // HANDLE PRESS GAME
-            if(pageStatus == 'gameplay'){
-                // if (!held[1] && !held[2] && edgeDown(1) && edgeDown(2)) {
-                    // hitSound.play()
-                    purpleAngle += step;
-                    if (purpleAngle >= 360) purpleAngle = 360; // clamp
-
-                    greenAngle -= step;
-                    if (greenAngle <= 0) greenAngle = 0; // clamp
-
-                    draw();
-                    checkWin();
-
-                    // held[1] = held[2] = true;
-                // }
+            if (pageStatus == 'gameplay') {
+                try { hitSound.currentTime = 0; hitSound.play(); } catch(e){}
+                // both move
+                purpleAngle += step; if (purpleAngle >= 360) purpleAngle = 360;
+                greenAngle  -= step; if (greenAngle  <=   0) greenAngle  =   0;
+                draw(); checkWin();
             }
-        } else if (button1Pressed) {
+            window._lastDownAt1 = now;
+            window._lastDownAt2 = now;
+
+        } else if (ok1) {
             statusMessage = 'Button 1 Pressed';
             buttonStatusDiv.style.backgroundColor = '#4CAF50';
             buttonStatusDiv.style.color = 'white';
-            console.log("BTN1 PRESSED")
-            console.log("PAGE : "+pageStatus)
+            console.log("BTN1 PRESSED"); console.log("PAGE : " + pageStatus);
 
-            // HANDLE PRESS GAME
-            if(pageStatus == 'gameplay'){
-                // if (!held[1] && edgeDown(1)) { 
-                    // hitSound.play()
-                    purpleAngle += step;
-                    if (purpleAngle >= 360) purpleAngle = 360; // clamp
-    
-                    console.log("PRESS GREEN : "+purpleAngle)
-    
-                    draw();
-                    checkWin();
-
-                //     held[1] = true; 
-                // }
-            }else{
+            if (pageStatus == 'gameplay') {
+                try { hitSound.currentTime = 0; hitSound.play(); } catch(e){}
+                purpleAngle += step; if (purpleAngle >= 360) purpleAngle = 360;
+                console.log("PRESS GREEN : " + purpleAngle);
+                draw(); checkWin();
+            } else {
                 onKey1();
             }
+            window._lastDownAt1 = now;
 
-
-        } else if (button2Pressed) {
+        } else if (ok2) {
             statusMessage = 'Button 2 Pressed';
             buttonStatusDiv.style.backgroundColor = '#2196F3';
             buttonStatusDiv.style.color = 'white';
-            console.log("BTN2 PRESSED")
-            console.log("PAGE : "+pageStatus)
+            console.log("BTN2 PRESSED"); console.log("PAGE : " + pageStatus);
 
-            // HANDLE PRESS GAME
-            if(pageStatus == 'gameplay'){
-                // if (!held[2] && edgeDown(2)) {
-                    // hitSound.play()
-                    greenAngle -= step;
-                    if (greenAngle <= 0) greenAngle = 0; // clamp
-    
-                    console.log("PRESS PURPLE : "+greenAngle)
-    
-                    draw();
-                    checkWin();
-
-                //     held[2] = true; 
-                // }
-            }else{
+            if (pageStatus == 'gameplay') {
+                try { hitSound.currentTime = 0; hitSound.play(); } catch(e){}
+                greenAngle -= step; if (greenAngle <= 0) greenAngle = 0;
+                console.log("PRESS PURPLE : " + greenAngle);
+                draw(); checkWin();
+            } else {
                 onKey2();
             }
+            window._lastDownAt2 = now;
         }
+
+        // update state untuk edge detector (wajib di akhir blok)
+        window._p1Prev = button1Pressed;
+        window._p2Prev = button2Pressed;
+        // TERAKHIR
+
+        // const now = performance.now();
+        // if (button1Pressed) lastSeen[1] = now;
+        // if (button2Pressed) lastSeen[2] = now;
+
+        // // rilis: jika sunyi > gap → boleh trigger lagi
+        // if (now - lastSeen[1] > RELEASE_GAP_MS) held[1] = false;
+        // if (now - lastSeen[2] > RELEASE_GAP_MS) held[2] = false;
+        
+        // Update status based on what buttons are pressed
+        // if (button1Pressed && button2Pressed) {
+        //     statusMessage = 'Both Buttons Pressed!';
+        //     buttonStatusDiv.style.backgroundColor = '#ff9800';
+        //     buttonStatusDiv.style.color = 'white';
+
+        //     // HANDLE PRESS GAME
+        //     if(pageStatus == 'gameplay'){
+        //         // if (!held[1] && !held[2] && edgeDown(1) && edgeDown(2)) {
+        //             // hitSound.play()
+        //             purpleAngle += step;
+        //             if (purpleAngle >= 360) purpleAngle = 360; // clamp
+
+        //             greenAngle -= step;
+        //             if (greenAngle <= 0) greenAngle = 0; // clamp
+
+        //             draw();
+        //             checkWin();
+
+        //             // held[1] = held[2] = true;
+        //         // }
+        //     }
+        // } else if (button1Pressed) {
+        //     statusMessage = 'Button 1 Pressed';
+        //     buttonStatusDiv.style.backgroundColor = '#4CAF50';
+        //     buttonStatusDiv.style.color = 'white';
+        //     console.log("BTN1 PRESSED")
+        //     console.log("PAGE : "+pageStatus)
+
+        //     // HANDLE PRESS GAME
+        //     if(pageStatus == 'gameplay'){
+        //         // if (!held[1] && edgeDown(1)) { 
+        //             // hitSound.play()
+        //             purpleAngle += step;
+        //             if (purpleAngle >= 360) purpleAngle = 360; // clamp
+    
+        //             console.log("PRESS GREEN : "+purpleAngle)
+    
+        //             draw();
+        //             checkWin();
+
+        //         //     held[1] = true; 
+        //         // }
+        //     }else{
+        //         onKey1();
+        //     }
+
+
+        // } else if (button2Pressed) {
+        //     statusMessage = 'Button 2 Pressed';
+        //     buttonStatusDiv.style.backgroundColor = '#2196F3';
+        //     buttonStatusDiv.style.color = 'white';
+        //     console.log("BTN2 PRESSED")
+        //     console.log("PAGE : "+pageStatus)
+
+        //     // HANDLE PRESS GAME
+        //     if(pageStatus == 'gameplay'){
+        //         // if (!held[2] && edgeDown(2)) {
+        //             // hitSound.play()
+        //             greenAngle -= step;
+        //             if (greenAngle <= 0) greenAngle = 0; // clamp
+    
+        //             console.log("PRESS PURPLE : "+greenAngle)
+    
+        //             draw();
+        //             checkWin();
+
+        //         //     held[2] = true; 
+        //         // }
+        //     }else{
+        //         onKey2();
+        //     }
+        // }
         
         if (statusMessage) {
             buttonStatusDiv.textContent = statusMessage;
