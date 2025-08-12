@@ -413,7 +413,11 @@ connectButton.addEventListener('click', async () => {
 });
 
 // Read serial data
-let player1Press = false, player2Press = false
+ // anti-hold state: event hanya sekali per tekan
+ const RELEASE_GAP_MS = 180;        // “sunyi” minimal untuk dianggap release
+ let held = { 1:false, 2:false };
+ let lastSeen = { 1:0, 2:0 };
+ 
 async function readSerialData() {
     while (port.readable && keepReading) {
     reader = port.readable.getReader();
@@ -444,6 +448,14 @@ async function readSerialData() {
                 button2Pressed = true;
             }
         });
+
+        const now = performance.now();
+        if (button1Pressed) lastSeen[1] = now;
+        if (button2Pressed) lastSeen[2] = now;
+
+        // release detection (sunyi > gap)
+        if (now - lastSeen[1] > RELEASE_GAP_MS) held[1] = false;
+        if (now - lastSeen[2] > RELEASE_GAP_MS) held[2] = false;
         
         // Update status based on what buttons are pressed
         if (button1Pressed && button2Pressed) {
@@ -453,23 +465,18 @@ async function readSerialData() {
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
-                player1Press = true
-                player2Press = true
-                setTimeout(() => {
-                    player1Press = false
-                    player2Press = false
-                }, 500);
-
-                if(player1Press && player2Press){
+                if (!held[1] && !held[2]) {
                     hitSound.play()
                     purpleAngle += step;
                     if (purpleAngle >= 360) purpleAngle = 360; // clamp
-    
+
                     greenAngle -= step;
                     if (greenAngle <= 0) greenAngle = 0; // clamp
-    
+
                     draw();
                     checkWin();
+
+                    held[1] = held[2] = true;
                 }
             }
         } else if (button1Pressed) {
@@ -481,12 +488,7 @@ async function readSerialData() {
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
-                player1Press = true
-                setTimeout(() => {
-                    player1Press = false
-                }, 500);
-
-                if(player1Press){
+                if (!held[1]) { 
                     hitSound.play()
                     purpleAngle += step;
                     if (purpleAngle >= 360) purpleAngle = 360; // clamp
@@ -495,6 +497,8 @@ async function readSerialData() {
     
                     draw();
                     checkWin();
+
+                    held[1] = true; 
                 }
             }else{
                 onKey1();
@@ -510,12 +514,7 @@ async function readSerialData() {
 
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
-                player2Press = true
-                setTimeout(() => {
-                    player2Press = false
-                }, 500);
-
-                if(player2Press){
+                if (!held[2]) {
                     hitSound.play()
                     greenAngle -= step;
                     if (greenAngle <= 0) greenAngle = 0; // clamp
@@ -524,6 +523,8 @@ async function readSerialData() {
     
                     draw();
                     checkWin();
+
+                    held[2] = true; 
                 }
             }else{
                 onKey2();
