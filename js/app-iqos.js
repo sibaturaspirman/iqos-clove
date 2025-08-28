@@ -287,6 +287,23 @@ function onKey2() {
             onKey1();
         }
       }
+
+    //   if ((e.key === '1' || e.code === 'Digit2' || e.code === 'Numpad2') && (e.key === '2' || e.code === 'Digit1' || e.code === 'Numpad1')){
+    //     if(pageStatus == 'gameplay'){
+    //         // hitSound.play()
+    //         console.log('BARENGAN')
+
+    //         greenAngle -= step;
+    //         if (greenAngle <= 0) greenAngle = 0; // clamp
+
+    //         purpleAngle += step;
+    //         if (purpleAngle >= 360) purpleAngle = 360; // clamp
+    //         draw();
+    //         checkWin();
+    //         e.preventDefault();
+    //     }
+    //   }
+
       if (e.key === 'Enter'){
         reset();
       }
@@ -481,11 +498,14 @@ async function readSerialData() {
                     } catch (e) {
                         console.error('Audio playback failed:', e);
                     }
-                    purpleAngle += step;
-                    if (purpleAngle >= 360) purpleAngle = 360; // clamp
+
+
 
                     greenAngle -= step;
                     if (greenAngle <= 0) greenAngle = 0; // clamp
+                    
+                    purpleAngle += step;
+                    if (purpleAngle >= 360) purpleAngle = 360; // clamp
 
                     draw();
                     checkWin();
