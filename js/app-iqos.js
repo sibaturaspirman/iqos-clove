@@ -503,7 +503,7 @@ async function readSerialData() {
 
                     greenAngle -= step;
                     if (greenAngle <= 0) greenAngle = 0; // clamp
-                    
+
                     purpleAngle += step;
                     if (purpleAngle >= 360) purpleAngle = 360; // clamp
 
@@ -513,7 +513,42 @@ async function readSerialData() {
                     // held[1] = held[2] = true;
                 // }
             }
-        } else if (button1Pressed) {
+        }
+
+
+        
+        if (button2Pressed) {
+            statusMessage = 'Button 2 Pressed';
+            buttonStatusDiv.style.backgroundColor = '#2196F3';
+            buttonStatusDiv.style.color = 'white';
+            console.log("BTN2 PRESSED")
+            console.log("PAGE : "+pageStatus)
+
+            // HANDLE PRESS GAME
+            if(pageStatus == 'gameplay'){
+                // if (!held[2] && edgeDown(2)) {
+                    try {
+                        hitSound.currentTime = 0;
+                        hitSound.play();
+                    } catch (e) {
+                        console.error('Audio playback failed:', e);
+                    }
+                    greenAngle -= step;
+                    if (greenAngle <= 0) greenAngle = 0; // clamp
+    
+                    console.log("PRESS PURPLE : "+greenAngle)
+    
+                    draw();
+                    checkWin();
+
+                //     held[2] = true; 
+                // }
+            }else{
+                onKey2();
+            }
+        }
+        
+        if (button1Pressed) {
             statusMessage = 'Button 1 Pressed';
             buttonStatusDiv.style.backgroundColor = '#4CAF50';
             buttonStatusDiv.style.color = 'white';
@@ -545,36 +580,7 @@ async function readSerialData() {
             }
 
 
-        } else if (button2Pressed) {
-            statusMessage = 'Button 2 Pressed';
-            buttonStatusDiv.style.backgroundColor = '#2196F3';
-            buttonStatusDiv.style.color = 'white';
-            console.log("BTN2 PRESSED")
-            console.log("PAGE : "+pageStatus)
-
-            // HANDLE PRESS GAME
-            if(pageStatus == 'gameplay'){
-                // if (!held[2] && edgeDown(2)) {
-                    try {
-                        hitSound.currentTime = 0;
-                        hitSound.play();
-                    } catch (e) {
-                        console.error('Audio playback failed:', e);
-                    }
-                    greenAngle -= step;
-                    if (greenAngle <= 0) greenAngle = 0; // clamp
-    
-                    console.log("PRESS PURPLE : "+greenAngle)
-    
-                    draw();
-                    checkWin();
-
-                //     held[2] = true; 
-                // }
-            }else{
-                onKey2();
-            }
-        }
+        } 
         
         if (statusMessage) {
             buttonStatusDiv.textContent = statusMessage;
