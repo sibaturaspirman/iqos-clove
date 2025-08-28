@@ -261,6 +261,37 @@ function onKey2() {
       if (finished && e.key === 'Enter'){ reset(); return; }
   
       if (finished) return;
+
+    //   if (pageStatus == 'gameplay') {
+    //     // Check if both keys are pressed (combination)
+    //     const key1Pressed = pressed.has('Digit2') || pressed.has('Numpad2');
+    //     const key2Pressed = pressed.has('Digit1') || pressed.has('Numpad1');
+
+    //     console.log(key1Pressed)
+        
+    //     if (key1Pressed && key2Pressed) {
+    //         // Both keys pressed - special combo action
+    //         // hitSound.play();
+    //         console.log('COMBO 1+2 ACTIVATED!');
+            
+    //         // Apply both actions simultaneously
+    //         greenAngle -= step;
+    //         if (greenAngle <= 0) greenAngle = 0;
+            
+    //         purpleAngle += step;
+    //         if (purpleAngle >= 360) purpleAngle = 360;
+            
+    //         // You could add special combo effects here
+    //         // comboSound.play(); // if you have combo sound
+    //         // score += bonusPoints; // bonus scoring
+    //         // showComboEffect(); // visual effects
+            
+    //         draw();
+    //         checkWin();
+    //         e.preventDefault();
+    //         return; // Exit early to prevent individual key processing
+    //     }
+    // }
   
       if (e.key === '2' || e.code === 'Digit1' || e.code === 'Numpad1'){
         if(pageStatus == 'gameplay'){
@@ -287,22 +318,6 @@ function onKey2() {
             onKey1();
         }
       }
-
-    //   if ((e.key === '1' || e.code === 'Digit2' || e.code === 'Numpad2') && (e.key === '2' || e.code === 'Digit1' || e.code === 'Numpad1')){
-    //     if(pageStatus == 'gameplay'){
-    //         // hitSound.play()
-    //         console.log('BARENGAN')
-
-    //         greenAngle -= step;
-    //         if (greenAngle <= 0) greenAngle = 0; // clamp
-
-    //         purpleAngle += step;
-    //         if (purpleAngle >= 360) purpleAngle = 360; // clamp
-    //         draw();
-    //         checkWin();
-    //         e.preventDefault();
-    //     }
-    //   }
 
       if (e.key === 'Enter'){
         reset();
@@ -488,6 +503,8 @@ async function readSerialData() {
             buttonStatusDiv.style.backgroundColor = '#ff9800';
             buttonStatusDiv.style.color = 'white';
 
+            console.log(statusMessage)
+
             // HANDLE PRESS GAME
             if(pageStatus == 'gameplay'){
                 // if (!held[1] && !held[2] && edgeDown(1) && edgeDown(2)) {
@@ -513,11 +530,7 @@ async function readSerialData() {
                     // held[1] = held[2] = true;
                 // }
             }
-        }
-
-
-        
-        if (button2Pressed) {
+        }else if (button2Pressed) {
             statusMessage = 'Button 2 Pressed';
             buttonStatusDiv.style.backgroundColor = '#2196F3';
             buttonStatusDiv.style.color = 'white';
@@ -546,9 +559,7 @@ async function readSerialData() {
             }else{
                 onKey2();
             }
-        }
-        
-        if (button1Pressed) {
+        }else if (button1Pressed) {
             statusMessage = 'Button 1 Pressed';
             buttonStatusDiv.style.backgroundColor = '#4CAF50';
             buttonStatusDiv.style.color = 'white';
