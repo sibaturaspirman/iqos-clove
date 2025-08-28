@@ -231,6 +231,8 @@ function onKey2() {
         if (finished) return;
         if (greenAngle <= 0 && purpleAngle >= 360){
           finished = true;
+          const randomNumber = Math.floor(Math.random() * 2) + 1;
+          gameEnd(randomNumber)
         //   setStatus('🤝 Draw! Kalian bertemu di puncak');
         } else if (greenAngle <= 0){
           finished = true;
