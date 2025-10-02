@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arduino Button Monitor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #status {
+      font-size: 18px;
+      margin-top: 20px;
+      color: #333;
+    }
+    #buttonStatus {
+      font-size: 16px;
+      margin-top: 10px;
+      padding: 10px;
+      background-color: white;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Arduino Control Panel</h1>
+  <button id="connectButton">Connect to Arduino</button>
+  <div id="status">Attempting to connect...</div>
+  
+  <div style="margin-top: 30px;">
+    <h2>Pintu Akrilik Belakang</h2>
+    <button id="doorUp">Pintu Naik (up_max)</button>
+    <button id="doorDown">Pintu Turun (down_max)</button>
+  </div>
+  
+  <div style="margin-top: 20px;">
+    <h2>LED Dibawah Rotator Sepatu</h2>
+    <button id="ledRed">LED Merah (led_red)</button>
+    <button id="ledWhite">LED Putih (led_white)</button>
+    <button id="ledGreen">LED Hijau (led_green)</button>
+  </div>
+  
+  <div style="margin-top: 20px;">
+    <h2>Rotating Display</h2>
+    <button id="displayLeft">Display Left (display_left)</button>
+    <button id="displayRight">Display Right (display_right)</button>
+  </div>
+  
+  <div id="commandStatus" style="margin-top: 20px; padding: 10px; background-color: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">Ready to send commands...</div>
+
+  <script>
+    let port;
+    let writer;
+
+    const connectButton = document.getElementById('connectButton');
+    const statusDiv = document.getElementById('status');
+    const commandStatusDiv = document.getElementById('commandStatus');
+
+    // Attempt to auto-connect to previously authorized port
+    async function tryAutoConnect() {
+      try {
+        const ports = await navigator.serial.getPorts();
+        if (ports.length > 0) {
+          port = ports[0]; // Use the first authorized port
+          await port.open({ baudRate: 9600 });
+          writer = port.writable.getWriter();
+          statusDiv.textContent = 'Auto-Connected to Arduino';
+          connectButton.textContent = 'Disconnect';
+          commandStatusDiv.textContent = 'Ready to send commands...';
+        } else {
+          statusDiv.textContent = 'No authorized ports found. Click Connect to select.';
+        }
+      } catch (error) {
+        statusDiv.textContent = `Auto-Connect Error: ${error.message}. Click Connect.`;
+      }
+    }
+
+    // Handle manual connect/disconnect
+    connectButton.addEventListener('click', async () => {
+      if (!port) {
+        try {
+          port = await navigator.serial.requestPort({});
+          await port.open({ baudRate: 9600 });
+          writer = port.writable.getWriter();
+          statusDiv.textContent = 'Connected to Arduino';
+          connectButton.textContent = 'Disconnect';
+          commandStatusDiv.textContent = 'Ready to send commands...';
+        } catch (error) {
+          statusDiv.textContent = `Error: ${error.message}`;
+        }
+      } else {
+        if (writer) {
+          writer.releaseLock();
+          writer = null;
+        }
+        await port.close();
+        port = null;
+        statusDiv.textContent = 'Disconnected';
+        connectButton.textContent = 'Connect to Arduino';
+        commandStatusDiv.textContent = 'Ready to send commands...';
+      }
+    });
+
+    // Send command to Arduino
+    async function sendCommand(command) {
+      if (!port || !writer) {
+        commandStatusDiv.textContent = 'Not connected to Arduino';
+        commandStatusDiv.style.backgroundColor = '#ffebee';
+        commandStatusDiv.style.color = '#c62828';
+        return;
+      }
+      
+      try {
+        const data = new TextEncoder().encode(command + '\n');
+        await writer.write(data);
+        commandStatusDiv.textContent = `Command sent: ${command}`;
+        commandStatusDiv.style.backgroundColor = '#e8f5e8';
+        commandStatusDiv.style.color = '#2e7d32';
+        
+        // Reset status after 2 seconds
+        setTimeout(() => {
+          commandStatusDiv.textContent = 'Ready to send commands...';
+          commandStatusDiv.style.backgroundColor = 'white';
+          commandStatusDiv.style.color = '#333';
+        }, 2000);
+      } catch (error) {
+        commandStatusDiv.textContent = `Error sending command: ${error.message}`;
+        commandStatusDiv.style.backgroundColor = '#ffebee';
+        commandStatusDiv.style.color = '#c62828';
+      }
+    }
+
+    // Event listeners for control buttons
+    document.getElementById('doorUp').addEventListener('click', () => sendCommand('up_max'));
+    document.getElementById('doorDown').addEventListener('click', () => sendCommand('down_max'));
+    document.getElementById('ledRed').addEventListener('click', () => sendCommand('led_red'));
+    document.getElementById('ledWhite').addEventListener('click', () => sendCommand('led_white'));
+    document.getElementById('ledGreen').addEventListener('click', () => sendCommand('led_green'));
+    document.getElementById('displayLeft').addEventListener('click', () => sendCommand('display_left'));
+    document.getElementById('displayRight').addEventListener('click', () => sendCommand('display_right'));
+
+    // Start auto-connect on page load
+    window.addEventListener('load', tryAutoConnect);
+  </script>
+</body>
+</html>

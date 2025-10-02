@@ -1,0 +1,284 @@
+<!-- //v0.0.1...................................................antigravity.id..........................................................-->
+<!DOCTYPE html>
+<html>
+<head>
+	<title>VAULT</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+	<link rel="shortcut icon" href="assets/images/favicon.png"/>
+	<meta name="description" content="VAULT" />
+    <link rel="stylesheet" href="css/main.css">
+    
+    <script src="js/libs.min.js"></script>
+    
+
+</head>
+<body>
+    <div class="bgvideo">
+        <video src="./assets/videos/bg.mp4" autoplay muted loop></video>
+    </div>
+    
+    <!-- GAMEPLAY -->
+    <div style="position: fixed;z-index: 100;bottom: 0;left: 0;width: 150px;height: 150px;background-color: transparent;opacity: .2;display: flex;align-items: center;justify-content: center;opacity: 0.4;border: 0 dashed #fff;" id="debugTutup" onclick="reset()"><span style="position: relative;top: 24px;left: -24px;">R</span></div>
+    <div style="position: fixed;z-index: 100;bottom: 0;right: 0;width: 150px;height: 150px;background-color: transparent;opacity: .2;display: flex;align-items: center;justify-content: center;opacity: 0.4;border: 0 dashed #fff;" id="debugBuka" onclick="bukaPintu()"><span style="position: relative;top: 24px;left: 24px;">BP</span></div>
+    
+    <div style="position: fixed;z-index: 100;top: 0;left: 0;width: 150px;height: 150px;background-color: transparent;opacity: .2;display: flex;align-items: center;justify-content: center;opacity: 0.4;border: 0 dashed #fff;" id="setupTimer" onclick="setupTimer()"><span style="position: relative;top: -24px;left: -24px;">30</span></div>
+
+    <div style="position: fixed;z-index: 100;top: 0;right: 0;width: 150px;height: 150px;background-color: transparent;" id="debugReload" onclick="reloadPage()"></div>
+    <div class="kisi" id="debugKisi" onclick="showKisi()" style="display: none;"></div>
+
+    <div class="main hidex" id="pageFront">
+        <div class="main__content">
+            <div class="htp hideSomething" onclick="nextPageFront()">
+                <div class="block-image" style="width: 95%;"><img src="./assets/images/N-HTP.png" alt="IQOS" /></div>
+            </div>
+            <div class="front" style="width: 65%;margin-top: -11rem;">
+                <div class="logo" onclick="startAwal()">
+                    <div class="block-image"><img src="./assets/images/N-LOGO.png" alt="IQOS" /></div>
+                    <div class="block-image tap" style="margin-top: -7rem;width: 60%;"><img src="./assets/images/N-PLAY.png" alt="IQOS" /></div>
+                </div>
+                <div style="display: none;" class="pleaseWait" id="pleaseWaitFront">
+                    <div class="block-image"><img src="./assets/images/N-3.png" alt="IQOS" /></div>
+                    <div class="block-image"><img src="./assets/images/N-2.png" alt="IQOS" /></div>
+                    <div class="block-image"><img src="./assets/images/N-1.png" alt="IQOS" /></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="gameplay-top hide">
+        <div class="gameplay-nyawa">
+            <div class="block-image show"><img src="./assets/images/V-C1.png" alt="IQOS"></div>
+            <div class="block-image hide"><img src="./assets/images/V-C2.png" alt="IQOS"></div>
+            <div class="block-image hide"><img src="./assets/images/V-C3.png" alt="IQOS"></div>
+            <div class="block-image hide"><img src="./assets/images/V-C4.png" alt="IQOS"></div>
+        </div>
+        <div class="gameplay-timer">
+            <div class="block-image"><img src="./assets/images/N-TIMER.png" alt="IQOS"></div>
+            <p style="width: 145px;"><span id="waktuMain">21</span>s</p>
+        </div>
+    </div>
+    
+    <div class="main hide" id="pageGameplay">
+        <div class="main__content gameplay">
+            <div class="block-image" style="width: 90%;"><img src="./assets/images/N-FRAME.png" alt="IQOS" /></div>
+            <div class="gameplay-content">
+                <div class="gameplay-q">
+                    <p>QUESTION</p>
+                    <h4 id="question">-</h4>
+                </div>
+                <div class="gameplay-slot gameplayAnswer" id="gamePlayAnswer"></div>
+                <div class="gameplay-slot gameplayAnswer" id="gamePlayAnswerBottom"></div>
+                <div class="block-image" style="width: 70%;"><img src="./assets/images/N-DIVIDER.png" alt="IQOS" /></div>
+                <!-- <div class="gameplay-divider"></div> -->
+                <!-- <div style="display: flex;width: 80%;align-items: center;justify-content: center;flex-wrap: wrap;">
+                    <div class="gameplay-slot" id="gamePlayOpsi" style="width: auto;margin: 0;"></div>
+                </div> -->
+                <div class="gameplay-slot" id="gamePlayOpsi" style="width: 70%;"></div>
+                <!-- <div class="gameplay-slot" id="gamePlayOpsiBottom"></div> -->
+                <div id="kisi2" style="display: none;"><span id="jawabAtas"></span> - <span id="jawabBawah"></span></div>
+                <div class="gameplay-btn">
+                    <button class="block-image clearbtn hide"  onclick="clearBtn()">
+                        <img src="./assets/images/N-CLEAR.png" alt="IQOS" />
+                    </button>
+                    <button class="block-image enterbtn hide" onclick="enterBtn()">
+                        <img src="./assets/images/N-ENTER.png" alt="IQOS" />
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main hide" id="pageSuccess" onclick="claimHadiah()">
+        <div class="main__content gameplay">
+            <div class="block-image top" style="width: 50%;"><img src="./assets/images/V-DID.png" alt="IQOS" /></div>
+            <div class="divider"></div>
+            <div class="gameplay-slot mod" id="gamePlaySuccessAnswer"></div>
+            <div class="gameplay-slot mod" id="gamePlaySuccessAnswerBottom"></div>
+            <div class="divider"></div>
+            <div class="gameplay-btn" style="width: 50%;">
+                <button class="block-image" style="width: 100%;">
+                    <img src="./assets/images/V-CLAIM.png" alt="IQOS" />
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="main hide" id="pageGameover" onclick="backHome()">
+        <div class="main__content gameplay">
+            <div class="block-image top" style="width: 70%;"><img src="./assets/images/V-LOST.png" alt="IQOS" /></div>
+            <div class="divider"></div>
+            <div class="gameplay-slot mod" id="gamePlayGameoverAnswer"></div>
+            <div class="gameplay-slot mod" id="gamePlayGameoverAnswerBottom"></div>
+            <div class="divider"></div>
+            <div class="gameplay-btn" style="width: 50%;">
+                <button class="block-image" style="width: 100%;">
+                    <img src="./assets/images/V-BACK.png" alt="IQOS" />
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NUMBER -->
+    <div class="main hide number" id="pageGameplayNumber">
+        <div class="left">
+            <h1 class="title">Vault Combination Numbers</h1>
+        
+            <div class="topbar" style="display: none;">
+                <div class="status" id="status">Masukkan 4 angka (4 percobaan)</div>
+                <button class="btn" id="resetBtn">Restart</button>
+            </div>
+            
+            <div class="board" id="board" aria-live="polite"></div>
+            
+            <div class="block-image" style="width: 80%;margin-top: 2rem;"><img src="./assets/images/number-kisi.png" alt="IQOS"></div>
+        </div>
+        <div class="right">
+            <div class="pad" id="pad">
+            <!-- 1..9 -->
+            <div class="key">1</div>
+            <div class="key">2</div>
+            <div class="key">3</div>
+            <div class="key">4</div>
+            <div class="key">5</div>
+            <div class="key">6</div>
+            <div class="key">7</div>
+            <div class="key">8</div>
+            <div class="key">9</div>
+            <!-- Backspace, 0, Enter -->
+            <div class="key icon" data-action="back">⌫</div>
+            <div class="key">0</div>
+            <div class="key icon" data-action="enter">↩︎</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- !GAMEPLAY -->
+
+
+    <!-- TEST SERIAL -->
+    <div class="main hidex serial" id="pageSerial" style="background-color: #000;">
+        <h1>Arduino Control Panel</h1>
+        <button id="connectButton">Connect to Arduino</button>
+        <div id="status">Attempting to connect...</div>
+        
+        <div style="margin-top: 30px;">
+            <h2>Pintu Akrilik Belakang</h2>
+            <button id="doorUp">Pintu Naik (up_max)</button>
+            <button id="doorDown">Pintu Turun (down_max)</button>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <h2>LED Dibawah Rotator Sepatu</h2>
+            <button id="ledRed">LED Merah (led_red)</button>
+            <button id="ledWhite">LED Putih (led_white)</button>
+            <button id="ledGreen">LED Hijau (led_green)</button>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <h2>Rotating Display</h2>
+            <button id="displayLeft">Display Left (display_left)</button>
+            <button id="displayRight">Display Right (display_right)</button>
+        </div>
+        
+        <div id="commandStatus" style="margin-top: 20px; padding: 10px; background-color: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">Ready to send commands...</div>
+    </div>
+
+    <script type="text/javascript" src="js/app-default.js"></script>
+    <script>
+        let port;
+        let writer;
+    
+        const connectButton = document.getElementById('connectButton');
+        const statusDiv = document.getElementById('status');
+        const commandStatusDiv = document.getElementById('commandStatus');
+    
+        // Attempt to auto-connect to previously authorized port
+        async function tryAutoConnect() {
+          try {
+            const ports = await navigator.serial.getPorts();
+            if (ports.length > 0) {
+              port = ports[0]; // Use the first authorized port
+              await port.open({ baudRate: 9600 });
+              writer = port.writable.getWriter();
+              statusDiv.textContent = 'Auto-Connected to Arduino';
+              connectButton.textContent = 'Disconnect';
+              commandStatusDiv.textContent = 'Ready to send commands...';
+            } else {
+              statusDiv.textContent = 'No authorized ports found. Click Connect to select.';
+            }
+          } catch (error) {
+            statusDiv.textContent = `Auto-Connect Error: ${error.message}. Click Connect.`;
+          }
+        }
+    
+        // Handle manual connect/disconnect
+        connectButton.addEventListener('click', async () => {
+          if (!port) {
+            try {
+              port = await navigator.serial.requestPort({});
+              await port.open({ baudRate: 9600 });
+              writer = port.writable.getWriter();
+              statusDiv.textContent = 'Connected to Arduino';
+              connectButton.textContent = 'Disconnect';
+              commandStatusDiv.textContent = 'Ready to send commands...';
+            } catch (error) {
+              statusDiv.textContent = `Error: ${error.message}`;
+            }
+          } else {
+            if (writer) {
+              writer.releaseLock();
+              writer = null;
+            }
+            await port.close();
+            port = null;
+            statusDiv.textContent = 'Disconnected';
+            connectButton.textContent = 'Connect to Arduino';
+            commandStatusDiv.textContent = 'Ready to send commands...';
+          }
+        });
+    
+        // Send command to Arduino
+        async function sendCommand(command) {
+          if (!port || !writer) {
+            commandStatusDiv.textContent = 'Not connected to Arduino';
+            commandStatusDiv.style.backgroundColor = '#ffebee';
+            commandStatusDiv.style.color = '#c62828';
+            return;
+          }
+          
+          try {
+            const data = new TextEncoder().encode(command + '\n');
+            await writer.write(data);
+            commandStatusDiv.textContent = `Command sent: ${command}`;
+            commandStatusDiv.style.backgroundColor = '#e8f5e8';
+            commandStatusDiv.style.color = '#2e7d32';
+            
+            // Reset status after 2 seconds
+            setTimeout(() => {
+              commandStatusDiv.textContent = 'Ready to send commands...';
+              commandStatusDiv.style.backgroundColor = 'white';
+              commandStatusDiv.style.color = '#333';
+            }, 2000);
+          } catch (error) {
+            commandStatusDiv.textContent = `Error sending command: ${error.message}`;
+            commandStatusDiv.style.backgroundColor = '#ffebee';
+            commandStatusDiv.style.color = '#c62828';
+          }
+        }
+    
+        // Event listeners for control buttons
+        document.getElementById('doorUp').addEventListener('click', () => sendCommand('up_max'));
+        document.getElementById('doorDown').addEventListener('click', () => sendCommand('down_max'));
+        document.getElementById('ledRed').addEventListener('click', () => sendCommand('led_red'));
+        document.getElementById('ledWhite').addEventListener('click', () => sendCommand('led_white'));
+        document.getElementById('ledGreen').addEventListener('click', () => sendCommand('led_green'));
+        document.getElementById('displayLeft').addEventListener('click', () => sendCommand('display_left'));
+        document.getElementById('displayRight').addEventListener('click', () => sendCommand('display_right'));
+    
+        // Start auto-connect on page load
+        window.addEventListener('load', tryAutoConnect);
+      </script>
+    
+</body>
+</html>

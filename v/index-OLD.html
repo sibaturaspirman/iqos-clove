@@ -1,0 +1,108 @@
+<!-- //v0.0.1...................................................antigravity.id..........................................................-->
+<!DOCTYPE html>
+<html>
+<head>
+	<title>VAULT</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+	<link rel="shortcut icon" href="assets/images/favicon.png"/>
+	<meta name="description" content="VAULT" />
+    <link rel="stylesheet" href="css/main.css">
+    
+    <script src="js/libs.min.js"></script>
+    
+
+</head>
+<body>
+    
+    <!-- GAMEPLAY -->
+    <div style="position: fixed;z-index: 100;bottom: 0;left: 0;width: 150px;height: 150px;background-color: transparent;opacity: .2;display: flex;align-items: center;justify-content: center;opacity: 0.4;border: 0 dashed #fff;" id="debugTutup" onclick="reset()"><span style="position: relative;top: 24px;left: -24px;">R</span></div>
+    <div style="position: fixed;z-index: 100;bottom: 0;right: 0;width: 150px;height: 150px;background-color: transparent;opacity: .2;display: flex;align-items: center;justify-content: center;opacity: 0.4;border: 0 dashed #fff;" id="debugBuka" onclick="bukaPintu()"><span style="position: relative;top: 24px;left: 24px;">BP</span></div>
+    
+    <div style="position: fixed;z-index: 100;top: 0;left: 0;width: 150px;height: 150px;background-color: transparent;opacity: .2;display: flex;align-items: center;justify-content: center;opacity: 0.4;border: 0 dashed #fff;" id="setupTimer" onclick="setupTimer()"><span style="position: relative;top: -24px;left: -24px;">30</span></div>
+
+    <div style="position: fixed;z-index: 100;top: 0;right: 0;width: 150px;height: 150px;background-color: transparent;" id="debugReload" onclick="reloadPage()"></div>
+    <div class="kisi" id="debugKisi" onclick="showKisi()" style="display: none;"></div>
+
+    <div class="main hidex" id="pageFront" onclick="nextPageFront()">
+        <div class="main__content">
+            <div class="front">
+                <div class="logo">
+                    <div class="block-image"><img src="./assets/images/V-LOGO.png" alt="IQOS" /></div>
+                    <div class="block-image tap"><img src="./assets/images/V-START.png" alt="IQOS" /></div>
+                </div>
+                <h2 style="display: none;" class="pleaseWait">PLEASE WAIT...</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="gameplay-top hide">
+        <div class="gameplay-nyawa">
+            <div class="block-image show"><img src="./assets/images/V-C1.png" alt="IQOS" /></div>
+            <div class="block-image hide"><img src="./assets/images/V-C2.png" alt="IQOS" /></div>
+            <div class="block-image hide"><img src="./assets/images/V-C3.png" alt="IQOS" /></div>
+            <div class="block-image hide"><img src="./assets/images/V-C4.png" alt="IQOS" /></div>
+        </div>
+        <div class="gameplay-timer">
+            <div class="block-image"><img src="./assets/images/V-TIMER.png" alt="IQOS" /></div>
+            <p><span id="waktuMain"></span>s</p>
+        </div>
+    </div>
+    
+    <div class="main hide" id="pageGameplay">
+        <div class="main__content gameplay">
+            <div class="divider"></div><div class="divider"></div>
+            <div class="gameplay-slot gameplayAnswer" id="gamePlayAnswer"></div>
+            <div class="gameplay-slot gameplayAnswer" id="gamePlayAnswerBottom"></div>
+            <div class="gameplay-divider"></div>
+            <!-- <div style="display: flex;width: 80%;align-items: center;justify-content: center;flex-wrap: wrap;">
+                <div class="gameplay-slot" id="gamePlayOpsi" style="width: auto;margin: 0;"></div>
+            </div> -->
+            <div class="gameplay-slot" id="gamePlayOpsi" style="width: 70%;"></div>
+            <!-- <div class="gameplay-slot" id="gamePlayOpsiBottom"></div> -->
+            <div id="kisi2" style="display: none;"><span id="jawabAtas"></span> - <span id="jawabBawah"></span></div>
+            <div class="gameplay-btn">
+                <button class="block-image clearbtn hide"  onclick="clearBtn()">
+                    <img src="./assets/images/V-CLEAR.png" alt="IQOS" />
+                </button>
+                <button class="block-image enterbtn hide" onclick="enterBtn()">
+                    <img src="./assets/images/V-ENTER.png" alt="IQOS" />
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main hide" id="pageSuccess" onclick="claimHadiah()">
+        <div class="main__content gameplay">
+            <div class="block-image top" style="width: 50%;"><img src="./assets/images/V-DID.png" alt="IQOS" /></div>
+            <div class="divider"></div>
+            <div class="gameplay-slot mod" id="gamePlaySuccessAnswer"></div>
+            <div class="gameplay-slot mod" id="gamePlaySuccessAnswerBottom"></div>
+            <div class="divider"></div>
+            <div class="gameplay-btn" style="width: 50%;">
+                <button class="block-image" style="width: 100%;">
+                    <img src="./assets/images/V-CLAIM.png" alt="IQOS" />
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="main hide" id="pageGameover" onclick="backHome()">
+        <div class="main__content gameplay">
+            <div class="block-image top" style="width: 70%;"><img src="./assets/images/V-LOST.png" alt="IQOS" /></div>
+            <div class="divider"></div>
+            <div class="gameplay-slot mod" id="gamePlayGameoverAnswer"></div>
+            <div class="gameplay-slot mod" id="gamePlayGameoverAnswerBottom"></div>
+            <div class="divider"></div>
+            <div class="gameplay-btn" style="width: 50%;">
+                <button class="block-image" style="width: 100%;">
+                    <img src="./assets/images/V-BACK.png" alt="IQOS" />
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- !GAMEPLAY -->
+
+    <script type="text/javascript" src="js/app-default-OLD.js"></script>
+</body>
+</html>
